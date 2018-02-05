@@ -11,6 +11,8 @@ class Renderer():
 	def render(self, map):
 		self.frameBuffer = []
 
+		self.__draw('P: ' + str(len(map.projectiles)) + '\n')
+
 		for i in range(0, map.sizeY):
 			for j in range(0, map.sizeX):
 				hasPlayer = j == map.player.x and i == map.player.y

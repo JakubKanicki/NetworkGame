@@ -1,5 +1,4 @@
 import random
-from directions import Direction
 import directions
 from player import Player
 from projectile import Projectile
@@ -10,6 +9,7 @@ class Map():
 		self.sizeX = sizeX
 		self.sizeY = sizeY
 		self.projectiles = []
+		self.dProjectiles = []
 		self.terrain = []
 		for i in range(0, sizeY):
 			temp = []
@@ -20,24 +20,22 @@ class Map():
 
 	def update(self):
 		for proj in self.projectiles:
-			proj.update(self)
+			if(proj.alive):
+				proj.update(self)
+			elif(proj not in self.dProjectiles):
+				self.dProjectiles.append(proj)
+
+		for proj in self.dProjectiles:
+			self.projectiles.remove(proj)
+		self.dProjectiles.clear()
 
 	def spawnProjectile(self, x, y, type, direction):
 		self.projectiles.append(Projectile(x, y, type, direction))
 
 	def getProjectile(self, x, y):
 		for proj in self.projectiles:
-			if(proj.x == x and proj.y == y):
+			if(proj.alive and proj.x == x and proj.y == y):
 				return proj
-
-	
-	def movePlayer(self, direction):
-		vec = directions.getMovement(direction)
-
-		if(not self.isSolid(self.player.x + vec[0], self.player.y + vec[1])):
-			self.player.x += vec[0]
-			self.player.y += vec[1]
-		self.player.direction = direction
 	
 	def isSolid(self, x, y):
 		if(not self.isValid(x, y)):

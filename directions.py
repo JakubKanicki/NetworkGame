@@ -5,7 +5,7 @@ class Direction():
 	LEFT = 2;
 	RIGHT = 3;
 
-def getMovement(direction):
+def getVec(direction):
 	if(direction == Direction.UP):
 		return (0, -1)
 	elif(direction == Direction.DOWN):

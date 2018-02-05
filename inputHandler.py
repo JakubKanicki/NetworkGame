@@ -1,6 +1,5 @@
 import shared
 import msvcrt
-import sys
 from directions import Direction
 
 def handleInput(map):
@@ -18,13 +17,13 @@ def handleInput(map):
 		shared.running = False
 		print("Shutting down...")
 	elif(inpt == 'w'):
-		map.movePlayer(Direction.UP)
+		map.player.move(map, Direction.UP)
 	elif(inpt == 's'):
-		map.movePlayer(Direction.DOWN)
+		map.player.move(map, Direction.DOWN)
 	elif(inpt == 'a'):
-		map.movePlayer(Direction.LEFT)
+		map.player.move(map, Direction.LEFT)
 	elif(inpt == 'd'):
-		map.movePlayer(Direction.RIGHT)
+		map.player.move(map, Direction.RIGHT)
 	elif(inpt == ' '):
 		map.spawnProjectile(map.player.x, map.player.y, 0, map.player.direction)
 	elif(inpt == '`'):

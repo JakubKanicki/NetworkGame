@@ -16,7 +16,7 @@ def gameRender():
 	renderer.render(map)
 
 
-map = Map(64, 16)
+map = Map(64, 24)
 renderer = Renderer()
 while shared.running:
 	gameInput()
