@@ -1,25 +1,23 @@
 import time
 import shared
+import logger
 from inputHandler import InputHandler
 from renderer import Renderer
 from map import Map
 
 def gameInput():
-	debug('-INPUT-')
+	logger.debug('-INPUT-')
 	inputHandler.handleInput(map)
 	
 def gameLogic():
-	debug('-LOGIC-')
+	logger.debug('-LOGIC-')
 	map.update()
 
 def gameRender():
-	debug('-RENDER-')
+	logger.debug('-RENDER-')
 	renderer.render(map)
 
-def debug(val):
-	if(shared.debugOutput):
-		print(val)
-
+logger.init()
 map = Map(96, 48)
 inputHandler = InputHandler()
 renderer = Renderer()
@@ -28,4 +26,7 @@ while shared.running:
 	gameInput()
 	gameLogic()
 	gameRender()
-	time.sleep(0.05)
+	logger.debug('-SLEEP-')
+	time.sleep(0.1)
+inputHandler.stop()
+logger.finish('main.log')

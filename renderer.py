@@ -1,5 +1,6 @@
 import os
 import shared
+import logger
 
 
 class Renderer():
@@ -33,7 +34,9 @@ class Renderer():
 			self.__draw('\n')
 
 		if(not shared.debugRender):
+			logger.debug('-RENDER-CLS-')
 			os.system('cls')
+		logger.debug('-PRINTING-')
 		print(''.join(self.frameBuffer), end='')
 
 	def __draw(self, value):

@@ -3,6 +3,7 @@ from threading import Thread, Lock
 import shared
 import msvcrt
 from directions import Direction
+import logger
 
 
 class InputThread(Thread):
@@ -11,24 +12,24 @@ class InputThread(Thread):
 		Thread.__init__(self)
 		self.setName('INPUT_THREAD')
 		self.handler = handler
+		self.setDaemon(True)
 
 	def run(self):
 		self.debug('Starting thread')
-		while shared.running:
+		while self.handler.running:
 			inpt = self.getInput()
 			self.debug('Acquiring input lock, inpt is: ' + inpt)
 			self.handler.inputLock.acquire()
 			self.debug('Input lock acquired, queue size: ' + str(self.handler.inputQueue.qsize()))
 			if(not self.handler.inputQueue.full()):
 				self.handler.inputQueue.put(inpt)
-			self.debug('Inpt added to queue')
+				self.debug('Inpt added to queue')
 			self.handler.inputLock.release()
 			self.debug('Input lock released')
 		self.debug('Exiting thread')
 
 	def debug(self, val):
-		if(shared.debugOutput):
-			print(self.getName() + '| ' + val)
+		logger.debug(self.getName() + '| ' + val)
 
 	def getInput(self):
 		while True:
@@ -46,29 +47,30 @@ class InputHandler:
 		self.inputQueue = Queue(4)
 		self.inputLock = Lock()
 		self.inputThread = InputThread(self)
+		self.running = False
 
 	def start(self):
+		self.running = True
 		self.inputThread.start()
 
-	def debug(self, val):
-		if(shared.debugOutput):
-			print(val)
+	def stop(self):
+		self.running = False
 
 	def handleInput(self, map):
 		inptHistory = []
-		self.debug('Checking queue...')
+		logger.debug('Checking queue...')
 		while not self.inputQueue.empty():
-			self.debug('Acquiring input lock...')
+			logger.debug('Acquiring input lock...')
 			self.inputLock.acquire()
-			self.debug('Input lock acquired, queue size: ' + str(self.inputQueue.qsize()))
+			logger.debug('Input lock acquired, queue size: ' + str(self.inputQueue.qsize()))
 			inpt = self.inputQueue.get()
-			self.debug('Input is: ' + inpt)
+			logger.debug('Input is: ' + inpt)
 			self.inputLock.release()
-			self.debug('Input lock released')
+			logger.debug('Input lock released')
 			if(not inpt in inptHistory):
 				inptHistory.append(inpt)
 				self.process(map, inpt)
-		self.debug('Input handled')
+		logger.debug('Input handled')
 
 	def process(self, map, inpt):
 		if(not shared.enableInput):
