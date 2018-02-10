@@ -4,6 +4,7 @@ import sys
 from network.packetMessage import PacketMessage
 from network import packetHandler
 
+
 def main():
 	host = 'localhost'
 	port = 5000

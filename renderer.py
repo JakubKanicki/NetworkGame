@@ -1,6 +1,7 @@
 import os
 import shared
 
+
 class Renderer():
 	terrainChar = ['.', ',', '#']
 	playerChar = ['^', 'v', '<', '>']

@@ -4,7 +4,8 @@ from player import Player
 from projectile import Projectile
 from particle import Particle
 
-class Map():
+
+class Map:
 	
 	def __init__(self, sizeX, sizeY):
 		self.sizeX = sizeX

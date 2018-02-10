@@ -3,9 +3,10 @@ import sys
 from network import packetMessage
 from network import packetHandler
 
+
 msg = 'HALOE!'
 
-if(len(sys.argv)>1):
+if(len(sys.argv) > 1):
 	msg = sys.argv[1]
 
 packet = packetMessage.PacketMessage(msg)

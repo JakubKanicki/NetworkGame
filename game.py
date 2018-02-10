@@ -3,6 +3,7 @@ import inputHandler
 from renderer import Renderer
 from map import Map
 
+
 def gameInput():
 	print('-INPUT-')
 	inputHandler.handleInput(map)

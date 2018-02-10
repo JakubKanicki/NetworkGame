@@ -4,6 +4,7 @@ import sys
 from network.packetMessage import PacketMessage
 from network import packetHandler
 
+
 def main():
 	host = 'localhost' #socket.gethostname() #if none then all available interfaces will be used
 	port = 5000

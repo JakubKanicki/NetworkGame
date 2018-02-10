@@ -2,6 +2,7 @@ import shared
 import msvcrt
 from directions import Direction
 
+
 def handleInput(map):
 	if(not shared.enableInput):
 		return

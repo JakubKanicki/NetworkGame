@@ -1,6 +1,7 @@
 import directions
 
-class Projectile():
+
+class Projectile:
 	shell = ['n', 'u', '{', '}']
 
 	def __init__(self, x, y, type, direction):
