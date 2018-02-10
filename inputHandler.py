@@ -16,7 +16,7 @@ class InputThread(Thread):
 
 	def run(self):
 		self.debug('Starting thread')
-		while self.handler.running:
+		while shared.running:
 			inpt = self.getInput()
 			self.debug('Acquiring input lock, inpt is: ' + inpt)
 			self.handler.inputLock.acquire()
@@ -47,14 +47,9 @@ class InputHandler:
 		self.inputQueue = Queue(4)
 		self.inputLock = Lock()
 		self.inputThread = InputThread(self)
-		self.running = False
 
 	def start(self):
-		self.running = True
 		self.inputThread.start()
-
-	def stop(self):
-		self.running = False
 
 	def handleInput(self, map):
 		inptHistory = []

@@ -28,5 +28,4 @@ while shared.running:
 	gameRender()
 	logger.debug('-SLEEP-')
 	time.sleep(0.1)
-inputHandler.stop()
 logger.finish('main.log')
