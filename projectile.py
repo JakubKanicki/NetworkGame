@@ -19,7 +19,7 @@ class Projectile():
 					self.x += vec[0]
 					self.y += vec[1]
 				else:
-					map.setTile(self.x + vec[0], self.y + vec[1], 0)
+					map.explode(self.x, self.y, 3)
 					self.alive = False
 
 	def getChar(self):

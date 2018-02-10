@@ -16,13 +16,19 @@ class Renderer():
 		for i in range(0, map.sizeY):
 			for j in range(0, map.sizeX):
 				hasPlayer = j == map.player.x and i == map.player.y
-				projectile = map.getProjectile(j, i)
+				proj = map.getProjectile(j, i)
+				ent = map.getEntity(j, i)
+				part = map.getParticle(j, i)
 				if(hasPlayer):
 					self.__draw(self.playerChar[map.player.direction])
-				elif(projectile != None):
-					self.__draw(projectile.getChar())
+				elif(proj != None):
+					self.__draw(proj.getChar())
+				elif(ent != None):
+					self.__draw(ent.getChar())
+				elif(part != None):
+					self.__draw(part.getChar())
 				else:
-					self.__draw(self.terrainChar[map.terrain[i][j]])
+					self.__draw(self.terrainChar[map.getTile(j, i)])
 			self.__draw('\n')
 
 		if(not shared.debugRender):
