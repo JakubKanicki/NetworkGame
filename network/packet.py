@@ -1,7 +1,7 @@
 
 class Packet:
 	
-	def __init__(self, type):
+	def __init__(self, type):#TODO add packet target (CLIENT or SERVER)
 		self.__type = type
 	
 	def getType(self):
@@ -12,6 +12,6 @@ class Packet:
 	
 	def readData(self, stream):
 		pass
-	
-	def execute(self):
-		pass
+
+	# def execute(self):	since it can be implemented with different parameters there is no point of defining it here
+	# 	pass

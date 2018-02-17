@@ -6,11 +6,11 @@ from renderer import Renderer
 from map import Map
 
 def gameInput():
-	timer.startSection('INPUT')
+	timer.startSection('INPUT')#TODO make input create packets instead
 	inputHandler.handleInput(map)
 
 def gameLogic():
-	timer.startSection('LOGIC')
+	timer.startSection('LOGIC')#TODO make logic check packets in queue
 	map.update()
 
 def gameRender():

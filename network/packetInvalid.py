@@ -11,6 +11,3 @@ class PacketInvalid(Packet):
 	
 	def readData(self, stream):
 		pass
-	
-	def execute(self):
-		pass
