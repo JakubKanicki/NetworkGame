@@ -4,14 +4,19 @@ from timing import Timer
 from inputHandler import InputHandler
 from renderer import Renderer
 from map import Map
+from network.networkHandler import NetworkHandler
 
 def gameInput():
-	timer.startSection('INPUT')#TODO make input create packets instead
-	inputHandler.handleInput(map)
+	timer.startSection('INPUT')
+	inputHandler.handleInput()
 
 def gameLogic():
-	timer.startSection('LOGIC')#TODO make logic check packets in queue
-	map.update()
+	timer.startSection('LOGIC')
+	packet = networkHandler.nextInbound()
+	while(packet != None):
+		packet.execute(map)
+		packet = networkHandler.nextInbound()
+	map.update()	#disable this somewhat on clients
 
 def gameRender():
 	timer.startSection('RENDER')
@@ -21,13 +26,16 @@ def gameRender():
 logger.init()
 timer = Timer()
 map = Map(96, 48)
-inputHandler = InputHandler()
 renderer = Renderer()
+inputHandler = InputHandler()
 inputHandler.start()
+networkHandler = NetworkHandler(False)
+networkHandler.start()
 while shared.running:
 	gameInput()
 	gameLogic()
 	gameRender()
 	timer.startSection('SLEEP')
-	timer.sync(4)
+	timer.sync(10)
+networkHandler.stop()
 logger.finish('main.log')

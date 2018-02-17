@@ -1,6 +1,7 @@
 from .packet import Packet
 from .packetType import PacketType
 
+
 class PacketInvalid(Packet):
 	
 	def __init__(self):

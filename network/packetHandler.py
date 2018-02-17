@@ -11,13 +11,16 @@ def receivePacket(stream):
 	packet.readData(stream)
 	return packet
 
+
 from .packetInvalid import PacketInvalid
 from .packetMessage import PacketMessage
+from .packetKeyPressed import PacketKeyPressed
 
-def getPacketList(): #python was being retarded with cyclic imports so I had to remove classes from enum and separate the file, might as well just get rid of enum and replace it with a number
+def getPacketList():	#find a better way to do this
 	packets = []
 	packets.append(PacketInvalid)
 	packets.append(PacketMessage)
+	packets.append(PacketKeyPressed)
 	return packets
 
 def buildPacket(id):

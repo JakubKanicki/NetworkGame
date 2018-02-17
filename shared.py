@@ -7,4 +7,6 @@ debugRender = False
 
 debugOutput = False
 
+continuousWriting = False
+
 debugStream = None

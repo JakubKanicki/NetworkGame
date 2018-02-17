@@ -2,9 +2,10 @@ from queue import Queue
 from threading import Thread, Lock
 import shared
 import msvcrt
-from directions import Direction
+from network.packetKeyPressed import PacketKeyPressed
+from keys import Key
 import logger
-
+import game
 
 class InputThread(Thread):
 
@@ -29,7 +30,7 @@ class InputThread(Thread):
 		self.debug('Exiting thread')
 
 	def debug(self, val):
-		logger.debug(self.getName() + '| ' + val)
+		logger.debug(self.getName() + '| ' + val, isDaemon=True)
 
 	def getInput(self):
 		while True:
@@ -51,7 +52,7 @@ class InputHandler:
 	def start(self):
 		self.inputThread.start()
 
-	def handleInput(self, map):
+	def handleInput(self):
 		inptHistory = []
 		logger.debug('Checking queue...')
 		while not self.inputQueue.empty():
@@ -64,25 +65,20 @@ class InputHandler:
 			logger.debug('Input lock released')
 			if(not inpt in inptHistory):
 				inptHistory.append(inpt)
-				self.process(map, inpt)
+			process(inpt)
+
 		logger.debug('Input handled')
 
-	def process(self, map, inpt):
-		if(not shared.enableInput):
-			return
-		if(inpt == 'q'):
-			shared.running = False
-		elif(inpt == 'w'):
-			map.player.move(map, Direction.UP)
-		elif(inpt == 's'):
-			map.player.move(map, Direction.DOWN)
-		elif(inpt == 'a'):
-			map.player.move(map, Direction.LEFT)
-		elif(inpt == 'd'):
-			map.player.move(map, Direction.RIGHT)
-		elif(inpt == ' '):
-			map.spawnProjectile(map.player.x, map.player.y, 0, map.player.direction)
-		elif(inpt == '`'):
-			shared.debugRender = not shared.debugRender
-		elif(inpt == '\\'):
-			shared.debugOutput = not shared.debugOutput
+def process(inpt):
+	if(not shared.enableInput):
+		return
+	keyId = Key.getId(inpt)
+	if(keyId != None):
+		game.networkHandler.queueOutbound(PacketKeyPressed(keyId))
+		return
+	if(inpt == 'q'):
+		shared.running = False
+	elif(inpt == '`'):
+		shared.debugRender = not shared.debugRender
+	elif(inpt == '\\'):
+		shared.debugOutput = not shared.debugOutput
