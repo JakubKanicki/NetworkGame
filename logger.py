@@ -2,6 +2,7 @@ import io
 import time
 import shared
 
+
 def init():
 	shared.debugStream = io.StringIO()
 	debug('Debug stream started.')

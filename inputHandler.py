@@ -55,18 +55,18 @@ class InputHandler:
 	def handleInput(self):
 		inptHistory = []
 		logger.debug('Checking queue...')
+		logger.debug('Acquiring input lock...')
+		self.inputLock.acquire()					#have to lock input for the duration of the loop to prevent more than 4 inputs per frame
+		logger.debug('Input lock acquired')
 		while not self.inputQueue.empty():
-			logger.debug('Acquiring input lock...')
-			self.inputLock.acquire()
-			logger.debug('Input lock acquired, queue size: ' + str(self.inputQueue.qsize()))
+			logger.debug('Input queue size: ' + str(self.inputQueue.qsize()))
 			inpt = self.inputQueue.get()
 			logger.debug('Input is: ' + inpt)
-			self.inputLock.release()
-			logger.debug('Input lock released')
 			if(not inpt in inptHistory):
 				inptHistory.append(inpt)
 			process(inpt)
-
+		self.inputLock.release()
+		logger.debug('Input lock released')
 		logger.debug('Input handled')
 
 def process(inpt):

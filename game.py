@@ -6,6 +6,7 @@ from renderer import Renderer
 from map import Map
 from network.networkHandler import NetworkHandler
 
+
 def gameInput():
 	timer.startSection('INPUT')
 	inputHandler.handleInput()

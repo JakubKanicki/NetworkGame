@@ -3,7 +3,7 @@ import shared
 import logger
 
 
-class Renderer():
+class Renderer:
 	terrainChar = [' ', '.', '#']
 	playerChar = ['^', 'v', '<', '>']
 

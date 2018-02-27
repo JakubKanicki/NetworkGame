@@ -6,6 +6,6 @@ enableInput = True
 debugRender = False
 debugOutput = False
 
-continuousWriting = True
+continuousWriting = False		#horrible performance, don't enable
 debugStreamStarted = False
 debugStream = None
