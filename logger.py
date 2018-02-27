@@ -10,12 +10,23 @@ def debug(val, isDaemon=False):
 	if(shared.debugOutput):
 		print(val)
 	if(shared.debugStream != None):
-		shared.debugStream.write(getTime() + '| ' + val + '\n')
-		if(not isDaemon and shared.continuousWriting):
-			finish('temp.log')	#TODO do this properly (write only new lines and not everything)
+		line = getTime() + '| ' + val + '\n'
+		shared.debugStream.write(line)
+		if(shared.continuousWriting):
+			temp = 'daemon.log' if isDaemon else 'temp.log'
+			if(shared.debugStreamStarted):
+				append(temp, line)
+			else:
+				finish(temp)
+				shared.debugStreamStarted = True
+
+def append(fileName, line):
+	file = open(fileName, 'a+')
+	file.write(line)
+	file.close()
 
 def finish(fileName):
-	file = open(fileName, 'w')
+	file = open(fileName, 'w+')
 	file.write(shared.debugStream.getvalue())
 	file.close()
 

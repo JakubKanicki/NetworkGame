@@ -4,9 +4,8 @@ running = True
 enableInput = True
 
 debugRender = False
-
 debugOutput = False
 
-continuousWriting = False
-
+continuousWriting = True
+debugStreamStarted = False
 debugStream = None

@@ -4,7 +4,7 @@ import logger
 
 
 class Renderer():
-	terrainChar = ['.', ',', '#']
+	terrainChar = [' ', '.', '#']
 	playerChar = ['^', 'v', '<', '>']
 
 	def __init__(self):
