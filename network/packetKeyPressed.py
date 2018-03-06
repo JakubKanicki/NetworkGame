@@ -20,12 +20,12 @@ class PacketKeyPressed(Packet):
 	def execute(self, map):
 		logger.debug('Executing packet key pressed: %d' % self.keyId)
 		if (self.keyId == Key.UP):
-			map.player.move(map, Direction.UP)
+			map.players[0].move(map, Direction.UP)
 		if (self.keyId == Key.DOWN):
-			map.player.move(map, Direction.DOWN)
+			map.players[0].move(map, Direction.DOWN)
 		if (self.keyId == Key.LEFT):
-			map.player.move(map, Direction.LEFT)
+			map.players[0].move(map, Direction.LEFT)
 		if (self.keyId == Key.RIGHT):
-			map.player.move(map, Direction.RIGHT)
+			map.players[0].move(map, Direction.RIGHT)
 		if (self.keyId == Key.FIRE):
-			map.spawnProjectile(map.player.x, map.player.y, 0, map.player.direction)
+			map.spawnProjectile(map.players[0].x, map.players[0].y, 0, map.players[0].direction)

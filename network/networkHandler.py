@@ -13,7 +13,7 @@ class NetworkThread(Thread):	#TODO actually set this up as a server / client and
 		self.running = True
 		self.setDaemon(True)#connection should be properly closed
 
-	def run(self):
+	def run(self):#one day I hope to get rid of all debug calls in this file...
 		self.debug('Starting thread')
 		while self.running:
 			packet = self.nextOutbound()

@@ -5,7 +5,6 @@ import logger
 
 class Renderer:
 	terrainChar = [' ', '.', '#']
-	playerChar = ['^', 'v', '<', '>']
 
 	def __init__(self):
 		self.frameBuffer = []
@@ -17,18 +16,9 @@ class Renderer:
 
 		for i in range(0, map.sizeY):
 			for j in range(0, map.sizeX):
-				hasPlayer = j == map.player.x and i == map.player.y
-				proj = map.getProjectile(j, i)
-				ent = map.getEntity(j, i)
-				part = map.getParticle(j, i)
-				if(hasPlayer):
-					self.__draw(self.playerChar[map.player.direction])
-				elif(proj != None):
-					self.__draw(proj.getChar())
-				elif(ent != None):
-					self.__draw(ent.getChar())
-				elif(part != None):
-					self.__draw(part.getChar())
+				obj = map.getTopObject(j, i)
+				if(obj):
+					self.__draw(obj.getChar())
 				else:
 					self.__draw(self.terrainChar[map.getTile(j, i)])
 			self.__draw('\n')
