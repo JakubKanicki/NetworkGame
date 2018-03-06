@@ -22,9 +22,17 @@ class Map:
 		for i in range(0, sizeY):
 			temp = []
 			for j in range(0, sizeX):
-				temp.append(random.randrange(0, 3))
+				tile = random.randrange(0, 10)
+				if(tile >= 5):
+					tile -= 5
+				else:
+					tile %= 2
+				temp.append(tile)
 			self.terrain.append(temp)
 		self.players.append(Player(0, 0))
+		self.players.append(Player(sizeX-1, sizeY-1))		#temporary
+		self.clearArea(5, 5, 5)
+		self.clearArea(sizeX-5, sizeY-5, 5)
 
 	def update(self):
 		self.updateGameObject(self.players, self.dPlayers)
@@ -32,7 +40,7 @@ class Map:
 		self.updateGameObject(self.entities, self.dEntities)
 		self.updateGameObject(self.particles, self.dParticles)
 
-	def updateGameObject(self, list, dList):
+	def updateGameObject(self, list, dList):#fake polymorphism xd
 		for obj in list:
 			if(obj.alive):
 				obj.update(self)
@@ -76,15 +84,25 @@ class Map:
 			if(player.alive and player.x == x and player.y == y):
 				return player
 	
-	def isSolid(self, x, y):
+	def isSolid(self, x, y, isPlayer=False):
 		if(not self.isValid(x, y)):
 			return True
-		return self.terrain[y][x] > 1 or self.getPlayer(x, y)
+		tile = self.terrain[y][x]
+		if(isPlayer):
+			terr = tile == 0 or tile == 3
+		else:
+			terr = tile == 0 or tile == 2
+		return not terr or self.getPlayer(x, y)
 	
 	def isValid(self, x, y):
 		vx = x >= 0 and x < self.sizeX
 		vy = y >= 0 and y < self.sizeY
 		return  vx and vy
+
+	def clearArea(self, x, y, rad):
+		for i in range(-rad, rad):
+			for j in range(-rad, rad):
+				self.setTile(x + i, y + j, 0)
 
 	def setTile(self, x, y, tile):
 		if(self.isValid(x, y)):
@@ -105,6 +123,7 @@ class Map:
 		return gameObject
 
 	def explode(self, x, y, power):
+		self.spawnParticle(x, y, 0)
 		if(self.__expl(x, y)):
 			return
 		for i in range(0, power):
@@ -123,7 +142,8 @@ class Map:
 	def __expl(self, x, y):
 		if(not self.isValid(x, y)):
 			return True
-		tmp = self.getTile(x, y) > 1
-		self.setTile(x, y, 0)
-		self.spawnParticle(x, y, 0)
-		return tmp
+		tmp = self.getTile(x, y)
+		if(tmp == 1):
+			self.setTile(x, y, 0)
+			self.spawnParticle(x, y, 0)
+		return tmp == 1 or tmp == 3 or tmp == 4

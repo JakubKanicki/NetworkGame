@@ -45,7 +45,7 @@ class InputThread(Thread):
 class InputHandler:
 
 	def __init__(self):
-		self.inputQueue = Queue(4)
+		self.inputQueue = Queue(12)
 		self.inputLock = Lock()
 		self.inputThread = InputThread(self)
 
