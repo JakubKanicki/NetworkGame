@@ -4,7 +4,7 @@ from . import packetHandler
 
 
 def getSocket():
-	return socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	return socket.socket(socket.AF_INET, socket.SOCK_STREAM)		#tcp socket.SOCK_STREAM; udp socket.SOCK_DGRAM
 
 def bindServer(host, port):
 	sock = getSocket()
@@ -12,14 +12,13 @@ def bindServer(host, port):
 	sock.listen(1)
 	return sock
 
-def connectClient(host, port):
-	sock = getSocket()
+def connectClient(sock, host, port):
 	try:
 		sock.connect((host, port))
-		return sock
+		return True
 	except ConnectionRefusedError:
 		print("Connection refused")
-		return None
+		return False
 
 def recv(sock, buffer=1024):
 	data = None
@@ -27,6 +26,8 @@ def recv(sock, buffer=1024):
 		data = sock.recv(buffer)
 	except ConnectionResetError:
 		print("Connection reset")
+	except ConnectionAbortedError:
+		print("Connection aborted")
 	return data
 
 def send(sock, data):
@@ -45,6 +46,7 @@ def sendPacket(sock, packet):
 def recvPacket(sock, buffer=1024):
 	data = recv(sock, buffer)
 	if(not data):
+		print("Connection lost")
 		return None
 	stream = io.BytesIO(data)
 	return packetHandler.receivePacket(stream)

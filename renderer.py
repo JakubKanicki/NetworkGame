@@ -4,7 +4,7 @@ import logger
 
 
 class Renderer:
-	terrainChar = [' ', '.', '#']
+	terrainChar = [' ', '#', '~', 'O', '@']
 
 	def __init__(self):
 		self.frameBuffer = []

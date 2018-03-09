@@ -13,7 +13,7 @@ class Player:
 
 	def move(self, map, direction):
 		vec = directions.getVec(direction)
-		if (not map.isSolid(self.x + vec[0], self.y + vec[1])):
+		if (not map.isSolid(self.x + vec[0], self.y + vec[1], True)):
 			self.x += vec[0]
 			self.y += vec[1]
 		self.direction = direction

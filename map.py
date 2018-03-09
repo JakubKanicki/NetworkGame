@@ -40,7 +40,7 @@ class Map:
 		self.updateGameObject(self.entities, self.dEntities)
 		self.updateGameObject(self.particles, self.dParticles)
 
-	def updateGameObject(self, list, dList):#fake polymorphism xd
+	def updateGameObject(self, list, dList):
 		for obj in list:
 			if(obj.alive):
 				obj.update(self)
@@ -143,7 +143,7 @@ class Map:
 		if(not self.isValid(x, y)):
 			return True
 		tmp = self.getTile(x, y)
-		if(tmp == 1):
+		if(tmp <= 1):
 			self.setTile(x, y, 0)
 			self.spawnParticle(x, y, 0)
 		return tmp == 1 or tmp == 3 or tmp == 4
