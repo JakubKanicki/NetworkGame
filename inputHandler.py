@@ -3,6 +3,7 @@ from threading import Thread, Lock
 import shared
 import msvcrt
 from network.packetKeyPressed import PacketKeyPressed
+from directions import Direction
 from keys import Key
 import logger
 import game
@@ -38,7 +39,7 @@ class InputThread(Thread):
 				inpt = msvcrt.getch().decode("utf-8").lower()
 				break
 			except UnicodeDecodeError:
-				pass #print("Unrecognized key")
+				pass
 		return inpt
 
 
@@ -52,11 +53,11 @@ class InputHandler:
 	def start(self):
 		self.inputThread.start()
 
-	def handleInput(self):
+	def handleInput(self, map):
 		inptHistory = []
 		logger.debug('Checking queue...')
 		logger.debug('Acquiring input lock...')
-		self.inputLock.acquire()					#have to lock input for the duration of the loop to prevent more than 4 inputs per frame
+		self.inputLock.acquire()					# have to lock input for the duration of the loop to prevent more than queue size inputs per frame
 		logger.debug('Input lock acquired')
 		while not self.inputQueue.empty():
 			logger.debug('Input queue size: ' + str(self.inputQueue.qsize()))
@@ -64,17 +65,21 @@ class InputHandler:
 			logger.debug('Input is: ' + inpt)
 			if(not inpt in inptHistory):
 				inptHistory.append(inpt)
-			process(inpt)
+			process(inpt, map)
 		self.inputLock.release()
 		logger.debug('Input lock released')
 		logger.debug('Input handled')
 
-def process(inpt):
+
+def process(inpt, map):
 	if(not shared.enableInput):
 		return
 	keyId = Key.getId(inpt)
 	if(keyId != None):
-		game.networkHandler.queueOutbound(PacketKeyPressed(keyId))
+		if(shared.isNetworked):
+			game.networkHandler.queueOutbound(PacketKeyPressed(keyId))
+		else:
+			processNetworked(map, keyId)
 		return
 	if(inpt == 'q'):
 		shared.running = False
@@ -82,3 +87,26 @@ def process(inpt):
 		shared.debugRender = not shared.debugRender
 	elif(inpt == '\\'):
 		shared.debugOutput = not shared.debugOutput
+
+def processNetworked(map, keyId):
+	if (keyId == Key.UP):
+		map.players[0].move(map, Direction.UP)
+	elif (keyId == Key.DOWN):
+		map.players[0].move(map, Direction.DOWN)
+	elif (keyId == Key.LEFT):
+		map.players[0].move(map, Direction.LEFT)
+	elif (keyId == Key.RIGHT):
+		map.players[0].move(map, Direction.RIGHT)
+	elif (keyId == Key.FIRE):
+		map.spawnProjectile(map.players[0].x, map.players[0].y, 0, map.players[0].direction)
+
+	elif (keyId == Key.S_UP):
+		map.players[1].move(map, Direction.UP)
+	elif (keyId == Key.S_DOWN):
+		map.players[1].move(map, Direction.DOWN)
+	elif (keyId == Key.S_LEFT):
+		map.players[1].move(map, Direction.LEFT)
+	elif (keyId == Key.S_RIGHT):
+		map.players[1].move(map, Direction.RIGHT)
+	elif (keyId == Key.S_FIRE):
+		map.spawnProjectile(map.players[1].x, map.players[1].y, 0, map.players[1].direction)

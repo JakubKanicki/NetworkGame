@@ -53,13 +53,12 @@ class NetworkThread(Thread):	#TODO actually set this up as a server / client and
 
 class NetworkHandler:#possibly have separate threads for receiving and transmitting
 
-	def __init__(self, isServer):
+	def __init__(self):
 		self.inboundQueue = Queue(16)
 		self.outboundQueue = Queue(16)
 		self.inboundLock = Lock()
 		self.outboundLock = Lock()
 		self.networkThread = NetworkThread(self)
-		self.isServer = isServer
 
 	def start(self):
 		self.networkThread.start()

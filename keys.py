@@ -7,11 +7,11 @@ class Key(Enum):
 	RIGHT = 'd', 3
 	FIRE = ' ', 4
 
-	DUP = '8', 5
-	DDOWN = '5', 6
-	DLEFT = '4', 7
-	DRIGHT = '6', 8
-	DFIRE = ',', 9
+	S_UP = '8', 5
+	S_DOWN = '5', 6
+	S_LEFT = '4', 7
+	S_RIGHT = '6', 8
+	S_FIRE = ',', 9
 
 	def __init__(self, char, id):
 		self.char = char

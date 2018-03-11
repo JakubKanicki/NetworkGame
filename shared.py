@@ -1,6 +1,11 @@
 
 running = True
 
+isClient = True
+isNetworked = False
+host = 'localhost'
+port = '5151'
+
 enableInput = True
 
 debugRender = False
