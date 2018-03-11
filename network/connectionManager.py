@@ -1,52 +1,89 @@
-import socket
-import io
-from . import packetHandler
+import time
+from . import connectionUtil
+import logger
+
+class Connection:		# is there even a point in using interfaces in python?
+
+	def __init__(self, host, port):
+		pass
+
+	def send(self, packet):
+		pass
+
+	def recv(self):
+		pass
+
+	def close(self):
+		pass
+
+class Client(Connection):
+
+	def __init__(self, host, port):
+		logger.debug('Client starting host %s, port %i' % (host, port))
+		self.sock = connectionUtil.getSocket()
+		while True:
+			if (connectionUtil.connectClient(self.sock, host, port)):
+				break
+			time.sleep(0.5)
+			# print("Press return to retry connection, enter 'q' to quit")
+			# if (input(">") == 'q'):
+			# 	sys.exit(0)
+
+	def send(self, packet):
+		return connectionUtil.sendPacket(self.sock, packet)
+
+	def recv(self):
+		return connectionUtil.recvPacket(self.sock)
+
+	def close(self):
+		self.sock.close()
 
 
-def getSocket():
-	return socket.socket(socket.AF_INET, socket.SOCK_STREAM)		#tcp socket.SOCK_STREAM; udp socket.SOCK_DGRAM
+class Server(Connection):
 
-def bindServer(host, port):
-	sock = getSocket()
-	sock.bind((host, port))
-	sock.listen(1)
-	return sock
+	def __init__(self, host, port):
+		logger.debug('Server starting host %s, port %i' % (host, port))
+		self.sock = connectionUtil.bindServer(host, port)
+		self.clients = []
 
-def connectClient(sock, host, port):
-	try:
-		sock.connect((host, port))
-		return True
-	except ConnectionRefusedError:
-		print("Connection refused")
-		return False
+	def scan(self):
+		conn, addr = self.sock.accept()
+		logger.debug("Connection from: " + str(addr))
+		self.clients.append((conn, addr))
 
-def recv(sock, buffer=1024):
-	data = None
-	try:
-		data = sock.recv(buffer)
-	except ConnectionResetError:
-		print("Connection reset")
-	except ConnectionAbortedError:
-		print("Connection aborted")
-	return data
+	def send(self, packet):
+		if(len(self.clients) <= 0):
+			self.scan()
+		dClients = []
+		for client in self.clients:
+			if(not connectionUtil.sendPacket(client[0], packet)):
+				dClients.append(client)
+		self.dropClients(dClients)
 
-def send(sock, data):
-	try:
-		sock.send(data)
-		return True
-	except ConnectionResetError:
-		print("Connection reset")
-		return False
+	def recv(self):		# should probably have multiple threads for multiple clients...
+		if(len(self.clients) <= 0):
+			self.scan()
+		dClients = []
+		for client in self.clients:
+			packet = connectionUtil.recvPacket(client[0])		# temporary
+			if(not packet):
+				dClients.append(client)
+			return packet		# temporary
+		self.dropClients(dClients)
 
-def sendPacket(sock, packet):
-	stream = io.BytesIO()
-	packetHandler.sendPacket(stream, packet)
-	return send(sock, stream.getvalue())
+	def dropClients(self, dClients):
+		for client in dClients:
+			logger.debug('Removing client IP ' + client[1])
+			client[0].close()
+			self.clients.remove(client)
 
-def recvPacket(sock, buffer=1024):
-	data = recv(sock, buffer)
-	if(not data):
-		print("Connection lost")
-		return None
-	stream = io.BytesIO(data)
-	return packetHandler.receivePacket(stream)
+	def close(self):
+		for client in self.clients:
+			client[0].close()
+		self.sock.close()
+
+
+def getConnection(isClient, host, port, isRecv):
+	if(isClient):
+		return Client(host, port if isRecv else port + 1)
+	return Server(host, port + 1 if isRecv else port)

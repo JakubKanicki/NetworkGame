@@ -1,7 +1,7 @@
 import io
 import sys
 import os
-from network import connectionManager
+from network import connectionUtil
 from network.packetMessage import PacketMessage
 from network import packetHandler
 
@@ -14,9 +14,9 @@ def main():
 	if(len(sys.argv)>2):
 		port = int(sys.argv[2])
 
-	sock = connectionManager.getSocket()
+	sock = connectionUtil.getSocket()
 	while True:
-		if(connectionManager.connectClient(sock, host, port)):
+		if(connectionUtil.connectClient(sock, host, port)):
 			break
 		print("Press return to retry connection, enter 'q' to quit")
 		if(input(">") == 'q'):
@@ -26,9 +26,9 @@ def main():
 
 	message = input(">")
 	while message != 'q':
-		if(not connectionManager.sendPacket(sock, PacketMessage(message))):
+		if(not connectionUtil.sendPacket(sock, PacketMessage(message))):
 			break
-		inPacket = connectionManager.recvPacket(sock)
+		inPacket = connectionUtil.recvPacket(sock)
 		if(not inPacket):
 			break
 		inPacket.execute()

@@ -1,7 +1,7 @@
 import socket
 import sys
 import os
-from network import connectionManager
+from network import connectionUtil
 from network.packetMessage import PacketMessage
 
 
@@ -14,7 +14,7 @@ def main():
 	if(len(sys.argv)>2):
 		port = int(sys.argv[2])
 
-	sock = connectionManager.bindServer(host, port)
+	sock = connectionUtil.bindServer(host, port)
 	
 	print("Listening on " + str(host) + "(" + str(socket.gethostbyname(host)) + ") on port " + str(port))
 	
@@ -22,7 +22,7 @@ def main():
 	print("Connection from: " + str(addr))
 	
 	while True:
-		inPacket = connectionManager.recvPacket(conn)
+		inPacket = connectionUtil.recvPacket(conn)
 		if(not inPacket):
 			break
 		inPacket.execute()
@@ -31,7 +31,7 @@ def main():
 		msg = inPacket.msg.upper()
 		print("Sending message to user: " + msg)
 
-		if(not connectionManager.sendPacket(conn, PacketMessage(msg))):
+		if(not connectionUtil.sendPacket(conn, PacketMessage(msg))):
 			break
 	conn.close()
 	sock.close()

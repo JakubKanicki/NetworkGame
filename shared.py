@@ -4,7 +4,7 @@ running = True
 isClient = True
 isNetworked = False
 host = 'localhost'
-port = '5151'
+port = 5151
 
 enableInput = True
 

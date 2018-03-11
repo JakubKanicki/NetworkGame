@@ -20,7 +20,7 @@ def gameLogic():
 			packet.execute(map)
 			packet = networkHandler.nextInbound()
 	timer.startSection('LOGIC')
-	map.update()	#disable this somewhat on clients
+	map.update()		# disable this somewhat on clients
 
 def gameRender():
 	timer.startSection('RENDER')
@@ -41,7 +41,7 @@ for arg in sys.argv:
 		shared.host = arg.lower()[3:]
 		logger.debug('IP: ' + str(shared.host))
 	elif (len(arg) > 5 and arg.lower()[:5] == 'port='):
-		shared.port = arg.lower()[5:]
+		shared.port = int(arg.lower()[5:])
 		logger.debug('Port: ' + str(shared.port))
 
 timer = Timer()

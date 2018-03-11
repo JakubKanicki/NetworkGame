@@ -19,6 +19,14 @@ class Map:
 		self.particles = []
 		self.dParticles = []
 		self.terrain = []
+
+		self.generate(sizeX, sizeY)
+		self.players.append(Player(0, 0))
+		self.clearArea(5, 5, 5)
+		self.players.append(Player(sizeX-1, sizeY-1))		#temporary
+		self.clearArea(sizeX-5, sizeY-5, 5)
+
+	def generate(self, sizeX, sizeY):
 		for i in range(0, sizeY):
 			temp = []
 			for j in range(0, sizeX):
@@ -29,10 +37,6 @@ class Map:
 					tile %= 2
 				temp.append(tile)
 			self.terrain.append(temp)
-		self.players.append(Player(0, 0))
-		self.players.append(Player(sizeX-1, sizeY-1))		#temporary
-		self.clearArea(5, 5, 5)
-		self.clearArea(sizeX-5, sizeY-5, 5)
 
 	def update(self):
 		self.updateGameObject(self.players, self.dPlayers)

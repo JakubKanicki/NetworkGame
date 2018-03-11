@@ -75,7 +75,7 @@ def process(inpt, map):
 	if(not shared.enableInput):
 		return
 	keyId = Key.getId(inpt)
-	if(keyId != None):
+	if(keyId != None and shared.isClient):
 		if(shared.isNetworked):
 			game.networkHandler.queueOutbound(PacketKeyPressed(keyId))
 		else:
