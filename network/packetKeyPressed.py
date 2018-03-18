@@ -4,6 +4,7 @@ from . import streamUtil
 import inputHandler
 import logger
 
+
 class PacketKeyPressed(Packet):
 
 	def __init__(self, keyId=None):

@@ -2,6 +2,7 @@ import time
 from . import connectionUtil
 import logger
 
+
 class Connection:		# is there even a point in using interfaces in python?
 
 	def __init__(self, host, port):
@@ -15,6 +16,7 @@ class Connection:		# is there even a point in using interfaces in python?
 
 	def close(self):
 		pass
+
 
 class Client(Connection):
 

@@ -8,6 +8,7 @@ from keys import Key
 import logger
 import game
 
+
 class InputThread(Thread):
 
 	def __init__(self, handler):

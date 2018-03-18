@@ -20,16 +20,16 @@ class Map:
 		self.dParticles = []
 		self.terrain = []
 
-		self.generate(sizeX, sizeY)
+		self.generate()
 		self.players.append(Player(0, 0))
 		self.clearArea(5, 5, 5)
 		self.players.append(Player(sizeX-1, sizeY-1))		#temporary
 		self.clearArea(sizeX-5, sizeY-5, 5)
 
-	def generate(self, sizeX, sizeY):
-		for i in range(0, sizeY):
+	def generate(self):
+		for i in range(0, self.sizeY):
 			temp = []
-			for j in range(0, sizeX):
+			for j in range(0, self.sizeX):
 				tile = random.randrange(0, 10)
 				if(tile >= 5):
 					tile -= 5
@@ -39,12 +39,12 @@ class Map:
 			self.terrain.append(temp)
 
 	def update(self):
-		self.updateGameObject(self.players, self.dPlayers)
-		self.updateGameObject(self.projectiles, self.dProjectiles)
-		self.updateGameObject(self.entities, self.dEntities)
-		self.updateGameObject(self.particles, self.dParticles)
+		self.updateGameObjects(self.players, self.dPlayers)
+		self.updateGameObjects(self.projectiles, self.dProjectiles)
+		self.updateGameObjects(self.entities, self.dEntities)
+		self.updateGameObjects(self.particles, self.dParticles)
 
-	def updateGameObject(self, list, dList):
+	def updateGameObjects(self, list, dList):
 		for obj in list:
 			if(obj.alive):
 				obj.update(self)
@@ -55,38 +55,38 @@ class Map:
 			list.remove(obj)
 		dList.clear()
 
+	def getGameObject(self, x, y, list):
+		for obj in list:
+			if(obj.alive and obj.x == x and obj.y == y):
+				return obj
+
 	def spawnProjectile(self, x, y, type, direction):
 		if(self.isValid(x, y)):
 			self.projectiles.append(Projectile(x, y, type, direction))
 
 	def getProjectile(self, x, y):
-		for proj in self.projectiles:
-			if(proj.alive and proj.x == x and proj.y == y):
-				return proj
+		return self.getGameObject(x, y, self.projectiles)
 
-	def spawnEntity(self, x, y, type):
-		#if(self.isValid(x, y)):
-		#	self.entities.append(Ent(x, y, type)) #TODO
-		pass
+	# def spawnEntity(self, x, y, type):	# TODO make entity class
+	# 	if(self.isValid(x, y)):
+	# 		self.entities.append(Ent(x, y, type))
 
 	def getEntity(self, x, y):
-		for ent in self.entities:
-			if(ent.alive and ent.x == x and ent.y == y):
-				return ent
+		return self.getGameObject(x, y, self.entities)
 
 	def spawnParticle(self, x, y, type):
 		if(self.isValid(x, y)):
 			self.particles.insert(0, Particle(x, y, type))
 
 	def getParticle(self, x, y):
-		for part in self.particles:
-			if(part.alive and part.x == x and part.y == y):
-				return part
+		return self.getGameObject(x, y, self.particles)
+
+	def spawnPlayer(self, x, y):
+		if(self.isValid(x, y)):
+			self.players.append(Player(x, y))
 
 	def getPlayer(self, x, y):
-		for player in self.players:
-			if(player.alive and player.x == x and player.y == y):
-				return player
+		return self.getGameObject(x, y, self.players)
 	
 	def isSolid(self, x, y, isPlayer=False):
 		if(not self.isValid(x, y)):
@@ -101,7 +101,7 @@ class Map:
 	def isValid(self, x, y):
 		vx = x >= 0 and x < self.sizeX
 		vy = y >= 0 and y < self.sizeY
-		return  vx and vy
+		return vx and vy
 
 	def clearArea(self, x, y, rad):
 		for i in range(-rad, rad):

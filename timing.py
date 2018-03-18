@@ -1,6 +1,7 @@
 import time
 import logger
 
+
 class Timer:
 
 	def __init__(self):

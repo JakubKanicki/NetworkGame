@@ -6,7 +6,7 @@ from network.packetMessage import PacketMessage
 
 
 def main():
-	host = 'localhost' #socket.gethostname() #if none then all available interfaces will be used
+	host = 'localhost' # socket.gethostname() or if none then all available interfaces will be used
 	port = 5000
 
 	if(len(sys.argv)>1):
@@ -16,7 +16,7 @@ def main():
 
 	sock = connectionUtil.bindServer(host, port)
 	
-	print("Listening on " + str(host) + "(" + str(socket.gethostbyname(host)) + ") on port " + str(port))
+	print("Listening on %s (%s) on port %i" % (host, socket.gethostbyname(host), port))
 	
 	conn, addr = sock.accept()
 	print("Connection from: " + str(addr))

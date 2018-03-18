@@ -90,7 +90,7 @@ class NetworkHandler:
 		self.outboundQueue = Queue(16)
 		self.inboundLock = Lock()
 		self.outboundLock = Lock()
-		self.inboundThread = InboundThread(self)
+		self.inboundThread = InboundThread(self)		# create an array of client listening threads, and make the central inbound thread accept connections and manage other threads
 		self.outboundThread = OutboundThread(self)
 
 	def start(self):

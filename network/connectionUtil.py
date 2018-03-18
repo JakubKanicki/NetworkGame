@@ -4,7 +4,7 @@ from . import packetHandler
 
 
 def getSocket():
-	return socket.socket(socket.AF_INET, socket.SOCK_STREAM)		#tcp socket.SOCK_STREAM; udp socket.SOCK_DGRAM
+	return socket.socket(socket.AF_INET, socket.SOCK_STREAM)		# tcp socket.SOCK_STREAM; udp socket.SOCK_DGRAM
 
 def bindServer(host, port):
 	sock = getSocket()

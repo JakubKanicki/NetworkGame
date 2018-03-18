@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class Key(Enum):
 	UP = 'w', 0
 	DOWN = 's', 1

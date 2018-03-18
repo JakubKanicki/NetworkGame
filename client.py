@@ -1,9 +1,8 @@
-import io
 import sys
 import os
 from network import connectionUtil
 from network.packetMessage import PacketMessage
-from network import packetHandler
+
 
 def main():
 	host = 'localhost'
@@ -36,6 +35,7 @@ def main():
 		message = input(">")
 	sock.close()
 	os.system('pause')
+
 
 if __name__ == '__main__':
 	main()
