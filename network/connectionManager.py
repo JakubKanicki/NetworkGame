@@ -41,7 +41,10 @@ class Client(Connection):
 		self.sock.close()
 
 
-class Server(Connection):
+import game		# temporary
+from network.packetFullMapSync import PacketFullMapSync
+
+class Server(Connection):		# should have separate files for server & client stuff
 
 	def __init__(self, host, port):
 		logger.debug('Server starting host %s, port %i' % (host, port))
@@ -50,10 +53,11 @@ class Server(Connection):
 
 	def scan(self):
 		conn, addr = self.sock.accept()
-		logger.debug("Connection from: " + str(addr))
+		logger.debug('Connection from: ' + str(addr))
 		self.clients.append((conn, addr))
+		game.networkHandler.queueOutbound(PacketFullMapSync(game.map))		# temporary
 
-	def send(self, packet):
+	def send(self, packet):		# TODO rename this sendAll & make method to send to individual clients
 		if(len(self.clients) <= 0):
 			self.scan()
 		dClients = []

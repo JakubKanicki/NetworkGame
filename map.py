@@ -20,7 +20,7 @@ class Map:
 		self.dParticles = []
 		self.terrain = []
 
-		self.generate()
+		self.generate()		# TODO split this from initialisation
 		self.players.append(Player(0, 0))
 		self.clearArea(5, 5, 5)
 		self.players.append(Player(sizeX-1, sizeY-1))		#temporary

@@ -60,4 +60,4 @@ while shared.running:
 	timer.sync(10)
 if(shared.isNetworked):
 	networkHandler.stop()
-logger.finish('main.log')
+logger.finish('main.log' if shared.isClient else 'server.log')

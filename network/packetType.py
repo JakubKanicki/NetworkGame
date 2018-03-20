@@ -2,3 +2,4 @@ class PacketType:
 	INVALID = 0
 	MESSAGE = 1
 	KEY_PRESSED = 2
+	FULL_MAP_SYNC = 3

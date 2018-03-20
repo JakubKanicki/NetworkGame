@@ -13,5 +13,5 @@ class Packet:
 	def readData(self, stream):
 		pass
 
-	# def execute(self):	since it can be implemented with different parameters there is no point of defining it here
+	# def execute(self):
 	# 	pass

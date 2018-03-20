@@ -1,7 +1,7 @@
 import socket
 import io
 from . import packetHandler
-
+import logger
 
 def getSocket():
 	return socket.socket(socket.AF_INET, socket.SOCK_STREAM)		# tcp socket.SOCK_STREAM; udp socket.SOCK_DGRAM
@@ -17,7 +17,7 @@ def connectClient(sock, host, port):
 		sock.connect((host, port))
 		return True
 	except ConnectionRefusedError:
-		print("Connection refused")
+		logger.debug("Connection refused")
 		return False
 
 def recv(sock, buffer=1024):
@@ -25,9 +25,9 @@ def recv(sock, buffer=1024):
 	try:
 		data = sock.recv(buffer)
 	except ConnectionResetError:
-		print("Connection reset")
+		logger.debug("Connection reset")
 	except ConnectionAbortedError:
-		print("Connection aborted")
+		logger.debug("Connection aborted")
 	return data
 
 def send(sock, data):
@@ -35,7 +35,7 @@ def send(sock, data):
 		sock.send(data)
 		return True
 	except ConnectionResetError:
-		print("Connection reset")
+		logger.debug("Connection reset")
 		return False
 
 def sendPacket(sock, packet):
@@ -43,10 +43,10 @@ def sendPacket(sock, packet):
 	packetHandler.sendPacket(stream, packet)
 	return send(sock, stream.getvalue())
 
-def recvPacket(sock, buffer=1024):
+def recvPacket(sock, buffer=10240):
 	data = recv(sock, buffer)
 	if(not data):
-		print("Connection lost")
+		logger.debug("Connection lost")
 		return None
 	stream = io.BytesIO(data)
 	return packetHandler.receivePacket(stream)

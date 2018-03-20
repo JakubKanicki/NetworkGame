@@ -15,6 +15,8 @@ def debug(val, isDaemon=False):
 		shared.debugStream.write(line)
 		if(shared.continuousWriting):
 			temp = 'daemon.log' if isDaemon else 'temp.log'
+			if(not shared.isClient):
+				temp = 'server_' + temp
 			if(shared.debugStreamStarted):
 				append(temp, line)
 			else:
