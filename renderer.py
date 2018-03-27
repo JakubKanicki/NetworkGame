@@ -1,10 +1,12 @@
 import os
+import platform
 import shared
 import logger
 
 
 class Renderer:
 	terrainChar = [' ', '#', '~', 'O', '@']
+	clearCall = 'cls' if (platform.system() == 'Windows') else 'clear'
 
 	def __init__(self):
 		self.frameBuffer = []
@@ -24,8 +26,8 @@ class Renderer:
 			self.__draw('\n')
 
 		if(not shared.debugRender):
-			logger.debug('-RENDER-CLS-')
-			os.system('cls')
+			logger.debug('-RENDER-%s-' % self.clearCall.upper())
+			os.system(self.clearCall)
 		logger.debug('-PRINTING-')
 		print(''.join(self.frameBuffer), end='')
 

@@ -1,12 +1,17 @@
+import platform
 from queue import Queue
 from threading import Thread, Lock
 import shared
-import msvcrt
 from network.packetKeyPressed import PacketKeyPressed
 from directions import Direction
 from keys import Key
 import logger
 import game
+
+if(platform.system() == 'Windows'):
+	import windowsInput as gameInput
+else:
+	import linuxInput as gameInput
 
 
 class InputThread(Thread):
@@ -37,7 +42,7 @@ class InputThread(Thread):
 	def getInput(self):
 		while True:
 			try:
-				inpt = msvcrt.getch().decode("utf-8").lower()
+				inpt = gameInput.getch().decode("utf-8").lower()
 				break
 			except UnicodeDecodeError:
 				pass
