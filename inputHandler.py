@@ -40,12 +40,9 @@ class InputThread(Thread):
 		logger.debug(self.getName() + '| ' + val, isDaemon=True)
 
 	def getInput(self):
-		while True:
-			try:
-				inpt = gameInput.getch().decode("utf-8").lower()
-				break
-			except UnicodeDecodeError:
-				pass
+		inpt = None
+		while not inpt:
+			inpt = gameInput.getch()
 		return inpt
 
 

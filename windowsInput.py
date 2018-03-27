@@ -1,4 +1,7 @@
 import msvcrt
 
 def getch():
-	return msvcrt.getch()
+	try:
+		return msvcrt.getch().decode("utf-8").lower()
+	except UnicodeDecodeError:
+		return None
