@@ -16,10 +16,11 @@ else:
 
 class InputThread(Thread):
 
-	def __init__(self, handler):
+	def __init__(self):
 		Thread.__init__(self)
 		self.setName('INPUT_THREAD')
-		self.handler = handler
+		self.queue = Queue(12)
+		self.lock = Lock()
 		self.setDaemon(True)
 
 	def run(self):
@@ -27,12 +28,12 @@ class InputThread(Thread):
 		while shared.running:
 			inpt = self.getInput()
 			self.debug('Acquiring input lock, inpt is: ' + inpt)
-			self.handler.inputLock.acquire()
-			self.debug('Input lock acquired, queue size: ' + str(self.handler.inputQueue.qsize()))
-			if(not self.handler.inputQueue.full()):
-				self.handler.inputQueue.put(inpt)
+			self.lock.acquire()
+			self.debug('Input lock acquired, queue size: ' + str(self.queue.qsize()))
+			if(not self.queue.full()):
+				self.queue.put(inpt)
 				self.debug('Inpt added to queue')
-			self.handler.inputLock.release()
+			self.lock.release()
 			self.debug('Input lock released')
 		self.debug('Exiting thread')
 
@@ -49,9 +50,7 @@ class InputThread(Thread):
 class InputHandler:
 
 	def __init__(self):
-		self.inputQueue = Queue(12)
-		self.inputLock = Lock()
-		self.inputThread = InputThread(self)
+		self.inputThread = InputThread()
 
 	def start(self):
 		self.inputThread.start()
@@ -60,16 +59,16 @@ class InputHandler:
 		inptHistory = []
 		logger.debug('Checking queue...')
 		logger.debug('Acquiring input lock...')
-		self.inputLock.acquire()					# have to lock input for the duration of the loop to prevent more than queue size inputs per frame
+		self.inputThread.lock.acquire()
 		logger.debug('Input lock acquired')
-		while not self.inputQueue.empty():
-			logger.debug('Input queue size: ' + str(self.inputQueue.qsize()))
-			inpt = self.inputQueue.get()
+		while not self.inputThread.queue.empty():
+			logger.debug('Input queue size: ' + str(self.inputThread.queue.qsize()))
+			inpt = self.inputThread.queue.get()
 			logger.debug('Input is: ' + inpt)
 			if(not inpt in inptHistory):
 				inptHistory.append(inpt)
 			process(inpt, map)
-		self.inputLock.release()
+		self.inputThread.lock.release()
 		logger.debug('Input lock released')
 		logger.debug('Input handled')
 
