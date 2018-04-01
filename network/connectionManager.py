@@ -55,7 +55,7 @@ class Server(Connection):		# should have separate files for server & client stuf
 		conn, addr = self.sock.accept()
 		logger.debug('Connection from: ' + str(addr))
 		self.clients.append((conn, addr))
-		game.networkHandler.queueOutbound(PacketFullMapSync(game.map))		# temporary
+		game.networkHandler.queueOutbound(PacketFullMapSync(game.map))		# sends double since 2 connections exist
 
 	def send(self, packet):		# TODO rename this sendAll & make method to send to individual clients
 		if(len(self.clients) <= 0):

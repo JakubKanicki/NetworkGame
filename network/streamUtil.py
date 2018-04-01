@@ -15,9 +15,3 @@ def writeString(stream, val, desc_bytes=2):
 def readString(stream, desc_bytes=2):
 	size = readInt(stream, desc_bytes)
 	return stream.read(size).decode()
-
-# def writeChar(stream, val):
-# 	stream.write(val.encode())
-#
-# def readChar(stream):
-# 	return stream.read(1).decode()

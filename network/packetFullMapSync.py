@@ -17,8 +17,8 @@ class PacketFullMapSync(Packet):
 		for i in range(0, self.map.sizeY):
 			for j in range(0, self.map.sizeX):
 				streamUtil.writeInt(stream, self.map.terrain[i][j], 1)
-				logger.debug('Transmitting X%i Y%i' % (j, i))
-				print('Transmitting X%i Y%i' % (j, i))
+				# logger.debug('Transmitting X%i Y%i' % (j, i))
+		logger.debug('Map written')
 
 	def readData(self, stream):
 		sizeX = streamUtil.readInt(stream, 1)
@@ -30,9 +30,9 @@ class PacketFullMapSync(Packet):
 			temp = []
 			for j in range(0, self.map.sizeX):
 				temp.append(streamUtil.readInt(stream, 1))
-				logger.debug('Receiving X%i Y%i' % (j, i))
-				print('Receiving X%i Y%i' % (j, i))
+				# logger.debug('Receiving X%i Y%i' % (j, i))
 			self.map.terrain.append(temp)
+		logger.debug('Map read')
 
 	def execute(self, map):
 		logger.debug('Executing packet full map sync...')
