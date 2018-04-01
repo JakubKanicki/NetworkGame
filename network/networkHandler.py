@@ -8,10 +8,11 @@ import logger
 
 class OutboundThread(Thread):		# TODO check packet target
 
-	def __init__(self, handler):
+	def __init__(self):
 		Thread.__init__(self)
 		self.setName('OUTBOUND_NETWORK_THREAD')
-		self.handler = handler
+		self.queue = Queue(16)
+		self.lock = Lock()
 		self.running = True
 		self.setDaemon(True)		# connection should be properly closed
 		self.connection = connectionManager.getConnection(shared.isClient, shared.host, shared.port, False)
@@ -34,24 +35,25 @@ class OutboundThread(Thread):		# TODO check packet target
 
 	def nextOutbound(self):
 		self.debug('Acquiring outbound lock...')
-		self.handler.outboundLock.acquire()
-		qsize = self.handler.outboundQueue.qsize()
+		self.lock.acquire()
+		qsize = self.queue.qsize()
 		self.debug('Outbound lock acquired, queue size: ' + str(qsize))
 		packet = None
 		if (qsize > 0):
-			packet = self.handler.outboundQueue.get()
+			packet = self.queue.get()
 			self.debug('Packet retrieved')
-		self.handler.outboundLock.release()
+		self.lock.release()
 		self.debug('Outbound lock released')
 		return packet
 
 
 class InboundThread(Thread):
 
-	def __init__(self, handler):
+	def __init__(self):
 		Thread.__init__(self)
 		self.setName('INBOUND_NETWORK_THREAD')
-		self.handler = handler
+		self.queue = Queue(16)
+		self.lock = Lock()
 		self.running = True
 		self.setDaemon(True)		# connection should be properly closed
 		self.connection = connectionManager.getConnection(shared.isClient, shared.host, shared.port, True)
@@ -74,11 +76,11 @@ class InboundThread(Thread):
 
 	def queueInbound(self, packet):
 		self.debug('Acquiring inbound lock...')
-		self.handler.inboundLock.acquire()
-		self.debug('Inbound lock acquired, queue size: ' + str(self.handler.inboundQueue.qsize()))
-		self.handler.inboundQueue.put(packet)
+		self.lock.acquire()
+		self.debug('Inbound lock acquired, queue size: ' + str(self.queue.qsize()))
+		self.queue.put(packet)
 		self.debug('Packet added to queue')
-		self.handler.inboundLock.release()
+		self.lock.release()
 		self.debug('Inbound lock released')
 		return packet
 
@@ -86,12 +88,8 @@ class InboundThread(Thread):
 class NetworkHandler:
 
 	def __init__(self):
-		self.inboundQueue = Queue(16)
-		self.outboundQueue = Queue(16)
-		self.inboundLock = Lock()
-		self.outboundLock = Lock()
-		self.inboundThread = InboundThread(self)		# create an array of client listening threads, and make the central inbound thread accept connections and manage other threads
-		self.outboundThread = OutboundThread(self)
+		self.inboundThread = InboundThread()		# create an array of client listening threads, and make the central inbound thread accept connections and manage other threads
+		self.outboundThread = OutboundThread()
 
 	def start(self):
 		self.inboundThread.start()
@@ -103,23 +101,23 @@ class NetworkHandler:
 
 	def nextInbound(self):
 		logger.debug('Acquiring inbound lock...')
-		self.inboundLock.acquire()
-		qsize = self.inboundQueue.qsize()
+		self.inboundThread.lock.acquire()
+		qsize = self.inboundThread.queue.qsize()
 		logger.debug('Inbound lock acquired, queue size: ' + str(qsize))
 		packet = None
 		if (qsize > 0):
-			packet = self.inboundQueue.get()
+			packet = self.inboundThread.queue.get()
 			logger.debug('Packet retrieved')
-		self.inboundLock.release()
+		self.inboundThread.lock.release()
 		logger.debug('Inbound lock released')
 		return packet
 
 	def queueOutbound(self, packet):
 		logger.debug('Acquiring outbound lock...')
-		self.outboundLock.acquire()
-		logger.debug('Outbound lock acquired, queue size: ' + str(self.outboundQueue.qsize()))
-		self.outboundQueue.put(packet)
+		self.outboundThread.lock.acquire()
+		logger.debug('Outbound lock acquired, queue size: ' + str(self.outboundThread.queue.qsize()))
+		self.outboundThread.queue.put(packet)
 		logger.debug('Packet added to queue')
-		self.outboundLock.release()
+		self.outboundThread.lock.release()
 		logger.debug('Outbound lock released')
 		return packet
