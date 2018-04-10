@@ -16,14 +16,13 @@ def receivePacket(stream):
 
 
 from .packetInvalid import PacketInvalid
-from .packetMessage import PacketMessage
 from .packetKeyPressed import PacketKeyPressed
 from .packetFullMapSync import PacketFullMapSync
+
 
 def getPacketList():		# find a better way to do this
 	packets = []
 	packets.append(PacketInvalid)
-	packets.append(PacketMessage)
 	packets.append(PacketKeyPressed)
 	packets.append(PacketFullMapSync)
 	return packets

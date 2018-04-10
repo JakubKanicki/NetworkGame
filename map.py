@@ -11,7 +11,7 @@ class Map:
 		self.sizeX = sizeX
 		self.sizeY = sizeY
 		self.players = []
-		self.dPlayers = []
+		self.dPlayers = []		# TODO delete all dLists
 		self.projectiles = []
 		self.dProjectiles = []
 		self.entities = []

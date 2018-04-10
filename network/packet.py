@@ -3,6 +3,7 @@ class Packet:
 	
 	def __init__(self, type):#TODO add packet target (CLIENT or SERVER)
 		self.__type = type
+		self.clientId = -1
 	
 	def getType(self):
 		return self.__type
