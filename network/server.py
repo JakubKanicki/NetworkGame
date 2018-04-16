@@ -5,7 +5,7 @@ from . import connectionUtil
 import shared
 import logger
 
-# TODO implement close in all of these & on the client
+
 class OutboundThread(Thread):
 
 	def __init__(self):
@@ -14,8 +14,10 @@ class OutboundThread(Thread):
 		self.queue = Queue(32)
 		self.lock = Lock()
 		self.running = True
-		self.setDaemon(True)		# connection should be properly closed
-		self.clients = []		# TODO implement a safe way of adding clients (another lock)
+		self.setDaemon(True)
+		self.clients = []
+		self.discoveryLock = Lock()
+
 
 	def run(self):
 		self.debug('Starting thread')
@@ -60,12 +62,20 @@ class OutboundThread(Thread):
 		self.debug('Outbound lock released')
 		return packet
 
+	def stop(self):
+		self.debug('Stopping...')
+		self.discoveryLock.acquire()
+		for client in self.clients:
+			client[1].close()
+		self.discoveryLock.release()
+		self.running = False
+
 
 class InboundThread(Thread):		# TODO check packet target
 
 	def __init__(self, handler, client):
 		Thread.__init__(self)
-		self.setName('INBOUND_NETWORK_THREAD')		# TODO add id to name
+		self.setName('INBOUND_NETWORK_THREAD_'+client[0])
 		self.running = True
 		self.setDaemon(True)		# connection should be properly closed
 		self.handler = handler
@@ -81,7 +91,6 @@ class InboundThread(Thread):		# TODO check packet target
 			self.debug('Got packet')
 			packet.clientId = self.client[0]
 			self.queueInbound(packet)
-		self.client[1].close()
 		self.debug('Exiting thread')
 
 	def debug(self, val):
@@ -97,27 +106,74 @@ class InboundThread(Thread):		# TODO check packet target
 		self.debug('Inbound lock released')
 		return packet
 
+	def stop(self):
+		self.debug('Stopping...')
+		self.client[1].close()
+		self.running = False
 
-# TODO create client discovery thread
-# TODO create accept method which will create client connections and either create new inbound threads as well as add clients to outbound thread or queue that for main thread to manage on engine update
-# maybe do it on engine update, seems safer to create new threads using the main one, although it would still require additional locks for outbound thread, but not for itself
+
+class DiscoveryThread(Thread):
+
+	def __init__(self, handler):
+		Thread.__init__(self)
+		self.setName('DISCOVERY_NETWORK_THREAD')
+		self.running = True
+		self.setDaemon(True)
+		self.handler = handler
+		self.inSock = connectionUtil.bindServer(shared.host, shared.port+1)
+		self.outSock = connectionUtil.bindServer(shared.host, shared.port)
+
+	def run(self):
+		self.debug('Starting thread')
+		while self.running:
+			clientId = 0		# TODO track client IDs somehow
+			clientIn = self.accept(self.inSock, clientId)
+			clientOut = self.accept(self.outSock, clientId)		# possible extremely rare case when 2 clients connect simultaneously
+			threadIn = InboundThread(self.handler, clientIn)
+			self.handler.discoveryLock.acquire()
+			self.handler.inboundThreads.append(threadIn)
+			self.handler.discoveryLock.release()
+			threadIn.start()
+			self.handler.outboundThread.discoveryLock.acquire()
+			self.handler.outboundThread.clients.append(clientOut)		# TODO test this whole thing
+			self.handler.outboundThread.discoveryLock.release()
+		self.debug('Exiting thread')
+
+	def accept(self, sock, id):
+		conn, addr = sock.accept()
+		logger.debug('Connection from: ' + str(addr))
+		return [id, conn, addr]
+
+	def debug(self, val):
+		logger.debug(self.getName() + '| ' + val, isDaemon=True)
+
+	def stop(self):
+		self.debug('Stopping...')
+		self.running = False
 
 
 class NetworkHandler:
 
 	def __init__(self):
+		self.discoveryThread = DiscoveryThread(self)
 		self.outboundThread = OutboundThread()
-		self.inboundThreads = []		# TODO add lock for new inbound threads
+		self.inboundThreads = []
 		self.inboundQueue = Queue(32)
 		self.inboundLock = Lock()
+		self.discoveryLock = Lock()
 
-	def start(self):		# TODO start discovery thread
+	def start(self):
+		self.discoveryThread.start()
 		self.outboundThread.start()
 
 	def stop(self):
-		self.outboundThread.running = False
+		logger.debug('Stopping network handler...')
+		self.discoveryThread.stop()
+		self.outboundThread.stop()
+		self.discoveryLock.acquire()
 		for inboundThread in self.inboundThreads:
-			inboundThread.running = False
+			inboundThread.stop()
+		self.discoveryLock.release()
 
 	def nextInbound(self):
 		logger.debug('Acquiring inbound lock...')

@@ -5,7 +5,7 @@ from . import connectionUtil
 import shared
 import logger
 
-
+# TODO implement stop in all of these
 class OutboundThread(Thread):
 
 	def __init__(self):

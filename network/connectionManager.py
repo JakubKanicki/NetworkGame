@@ -2,7 +2,7 @@ import time
 from . import connectionUtil
 import logger
 
-
+# TODO marked for deletion once new system is finished
 class Connection:		# is there even a point in using interfaces in python?
 
 	def __init__(self, host, port):

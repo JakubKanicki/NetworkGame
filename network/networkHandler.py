@@ -6,6 +6,7 @@ import shared
 import logger
 
 
+# TODO marked for deletion once new system is finished
 class OutboundThread(Thread):		# TODO check packet target
 
 	def __init__(self):
