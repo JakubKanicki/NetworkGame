@@ -12,9 +12,11 @@ class Renderer:
 		self.frameBuffer = []
 
 	def render(self, map):
+		if(not shared.enableRender):
+			return
 		self.frameBuffer = []
 
-		self.__draw('P: ' + str(len(map.projectiles)) + '\n')
+		self.__draw('P: %i NE: %i\n' % (len(map.projectiles), shared.invalidPacketCount))
 
 		for i in range(0, map.sizeY):
 			for j in range(0, map.sizeX):

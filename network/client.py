@@ -5,7 +5,7 @@ from . import connectionUtil
 import shared
 import logger
 
-# TODO implement stop in all of these
+
 class OutboundThread(Thread):
 
 	def __init__(self):
@@ -14,7 +14,7 @@ class OutboundThread(Thread):
 		self.queue = Queue(16)
 		self.lock = Lock()
 		self.running = True
-		self.setDaemon(True)		# connection should be properly closed
+		self.setDaemon(True)
 		self.sock = connectionUtil.getSocket()
 		while True:
 			if (connectionUtil.connectClient(self.sock, shared.host, shared.port+1)):
@@ -50,6 +50,11 @@ class OutboundThread(Thread):
 		self.debug('Outbound lock released')
 		return packet
 
+	def stop(self):
+		self.debug('Stopping...')
+		self.sock.close()
+		self.running = False
+
 
 class InboundThread(Thread):		# TODO check packet side
 
@@ -63,6 +68,7 @@ class InboundThread(Thread):		# TODO check packet side
 		self.sock = connectionUtil.getSocket()
 		while True:
 			if (connectionUtil.connectClient(self.sock, shared.host, shared.port)):
+				print('A'*20)
 				break
 			time.sleep(0.5)
 
@@ -92,6 +98,11 @@ class InboundThread(Thread):		# TODO check packet side
 		self.debug('Inbound lock released')
 		return packet
 
+	def stop(self):
+		self.debug('Stopping...')
+		self.sock.close()
+		self.running = False
+
 
 class NetworkHandler:
 
@@ -104,8 +115,9 @@ class NetworkHandler:
 		self.outboundThread.start()
 
 	def stop(self):
-		self.inboundThread.running = False
-		self.outboundThread.running = False
+		logger.debug('Stopping network handler...')
+		self.inboundThread.stop()
+		self.outboundThread.stop()
 
 	def nextInbound(self):
 		logger.debug('Acquiring inbound lock...')
