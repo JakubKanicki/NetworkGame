@@ -31,7 +31,6 @@ class OutboundThread(Thread):
 					self.debug('FAILED TO SEND PACKET')
 				packet = self.nextOutbound()
 			time.sleep(0.01)
-		self.sock.close()
 		self.debug('Exiting thread')
 
 	def debug(self, val):
@@ -81,8 +80,6 @@ class InboundThread(Thread):		# TODO check packet side
 				continue
 			self.debug('Got packet')
 			self.queueInbound(packet)
-			# time.sleep(0.01)
-		self.sock.close()
 		self.debug('Exiting thread')
 
 	def debug(self, val):

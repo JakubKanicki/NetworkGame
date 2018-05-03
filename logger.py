@@ -3,7 +3,7 @@ import time
 import shared
 
 
-def init():
+def init():		# TODO probably replace this with the built-in logging module
 	shared.debugStream = io.StringIO()
 	debug('Debug stream started.')
 

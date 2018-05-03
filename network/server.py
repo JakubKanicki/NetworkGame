@@ -5,6 +5,8 @@ from . import connectionUtil
 import shared
 import logger
 
+MAX_RETRIES = 5
+
 
 class OutboundThread(Thread):
 
@@ -18,7 +20,6 @@ class OutboundThread(Thread):
 		self.clients = []
 		self.discoveryLock = Lock()
 
-
 	def run(self):
 		self.debug('Starting thread')
 		while self.running:
@@ -28,8 +29,6 @@ class OutboundThread(Thread):
 				self.routePacket(packet)
 				packet = self.nextOutbound()
 			time.sleep(0.01)
-		for client in self.clients:
-			client[1].close()
 		self.debug('Exiting thread')
 
 	def routePacket(self, packet):
@@ -43,8 +42,24 @@ class OutboundThread(Thread):
 					break
 
 	def send(self, client, packet):
-		if (not connectionUtil.sendPacket(client[1], packet)):
-			self.debug('FAILED TO SEND PACKET TO CLIENT #%i' % client[0])		# TODO implement client dropping on fail (maybe retry a few times)
+		for i in range(MAX_RETRIES):
+			if (connectionUtil.sendPacket(client[1], packet)):
+				return
+			self.debug('FAILED TO SEND PACKET TO CLIENT #%i ATTEMPT %i/%i' % (client[0], i+1, MAX_RETRIES))
+		self.dropClient(client)
+
+	def dropClients(self, clientIds):
+		dClients = []
+		for clientId in clientIds:
+			for client in self.clients:
+				if (client[0] == clientId):
+					dClients.append(client)
+		for client in dClients:
+			self.dropClient(client)
+
+	def dropClient(self, client):
+		self.debug('DROPPING CLIENT #%i IP: %s' % (client[0], client[2]))
+		self.clients.remove(client)
 
 	def debug(self, val):
 		logger.debug(self.getName() + '| ' + val, isDaemon=True)
@@ -77,21 +92,31 @@ class InboundThread(Thread):		# TODO check packet target
 		Thread.__init__(self)
 		self.setName('INBOUND_NETWORK_THREAD_'+str(client[0]))
 		self.running = True
-		self.setDaemon(True)		# connection should be properly closed
+		self.setDaemon(True)
 		self.handler = handler
 		self.client = client		# client (id, socket, ip)
 
 	def run(self):
 		self.debug('Starting thread')
+		recvFails = 0
 		while self.running:
 			packet = connectionUtil.recvPacket(self.client[1])
 			if (not packet):
-				self.debug('FAILED TO RECEIVE PACKET')		# TODO implement client dropping on fail (maybe retry a few times)
+				self.debug('FAILED TO RECEIVE PACKET FROM CLIENT #%i FAILED %i/%i IN A ROW' % (self.client[0], recvFails+1, MAX_RETRIES))
+				recvFails += 1
+				if(recvFails >= MAX_RETRIES):
+					self.dropClient()
 				continue
+			recvFails = 0
 			self.debug('Got packet')
 			packet.clientId = self.client[0]
 			self.queueInbound(packet)
 		self.debug('Exiting thread')
+
+	def dropClient(self):
+		self.debug('DROPPING CLIENT #%i IP: %s' % (self.client[0], self.client[2]))
+		self.stop()
+		self.handler.isDirty = True
 
 	def debug(self, val):
 		logger.debug(self.getName() + '| ' + val, isDaemon=True)
@@ -130,6 +155,7 @@ class DiscoveryThread(Thread):
 			self.lastClientId += 1
 			clientIn = self.accept(self.inSock, self.lastClientId)
 			clientOut = self.accept(self.outSock, self.lastClientId)		# possible extremely rare case when 2 clients connect simultaneously
+
 			self.debug('Creating inbound thread for client #' + str(self.lastClientId))
 			threadIn = InboundThread(self.handler, clientIn)
 			self.debug('Acquiring handler discovery lock')
@@ -138,9 +164,10 @@ class DiscoveryThread(Thread):
 			self.handler.discoveryLock.release()
 			self.debug('Handler discovery lock released')
 			threadIn.start()
+
 			self.debug('Acquiring outbound discovery lock')
 			self.handler.outboundThread.discoveryLock.acquire()
-			self.handler.outboundThread.clients.append(clientOut)		# TODO test this whole thing
+			self.handler.outboundThread.clients.append(clientOut)
 			self.handler.outboundThread.discoveryLock.release()
 			self.debug('Outbound discovery lock released')
 		self.debug('Exiting thread')
@@ -169,6 +196,7 @@ class NetworkHandler:
 		self.inboundQueue = Queue(32)
 		self.inboundLock = Lock()
 		self.discoveryLock = Lock()
+		self.isDirty = False
 
 	def start(self):
 		self.discoveryThread.start()
@@ -183,7 +211,26 @@ class NetworkHandler:
 			inboundThread.stop()
 		self.discoveryLock.release()
 
+	def refresh(self):
+		dThreads = []
+		dClientIds = []
+		for inThread in self.inboundThreads:
+			if(not inThread.running):
+				dThreads.append(inThread)
+				dClientIds.append(inThread.client[0])
+		for inThread in dThreads:
+			logger.debug('Removing inbound thread: %s' % inThread.getName())
+			self.inboundThreads.remove(inThread)
+
+		logger.debug('Acquiring outbound discovery lock')
+		self.outboundThread.discoveryLock.acquire()
+		self.outboundThread.dropClients(dClientIds)
+		self.outboundThread.discoveryLock.release()
+		logger.debug('Outbound discovery lock released')
+
 	def nextInbound(self):
+		if(self.isDirty):
+			self.refresh()
 		logger.debug('Acquiring inbound lock...')
 		self.inboundLock.acquire()
 		qsize = self.inboundQueue.qsize()
