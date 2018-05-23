@@ -1,12 +1,12 @@
 import time
 from queue import Queue
 from threading import Thread, Lock
-from . import connectionManager
+from . import connectionUtil
 import shared
 import logger
 
 
-class OutboundThread(Thread):		# TODO check packet target
+class OutboundThread(Thread):
 
 	def __init__(self):
 		Thread.__init__(self)
@@ -14,20 +14,23 @@ class OutboundThread(Thread):		# TODO check packet target
 		self.queue = Queue(16)
 		self.lock = Lock()
 		self.running = True
-		self.setDaemon(True)		# connection should be properly closed
-		self.connection = connectionManager.getConnection(shared.isClient, shared.host, shared.port, False)
+		self.setDaemon(True)
+		self.sock = connectionUtil.getSocket()
+		while True:
+			if (connectionUtil.connectClient(self.sock, shared.host, shared.port+1)):
+				break
+			time.sleep(0.5)
 
-	def run(self):		# one day I hope to get rid of all debug calls in this file...
+	def run(self):
 		self.debug('Starting thread')
 		while self.running:
 			packet = self.nextOutbound()
 			while(packet != None):
 				self.debug('Got packet')
-				if(not self.connection.send(packet)):
+				if(not connectionUtil.sendPacket(self.sock, packet)):
 					self.debug('FAILED TO SEND PACKET')
 				packet = self.nextOutbound()
 			time.sleep(0.01)
-		self.connection.close()
 		self.debug('Exiting thread')
 
 	def debug(self, val):
@@ -46,8 +49,13 @@ class OutboundThread(Thread):		# TODO check packet target
 		self.debug('Outbound lock released')
 		return packet
 
+	def stop(self):
+		self.debug('Stopping...')
+		self.sock.close()
+		self.running = False
 
-class InboundThread(Thread):
+
+class InboundThread(Thread):		# TODO check packet side
 
 	def __init__(self):
 		Thread.__init__(self)
@@ -56,19 +64,22 @@ class InboundThread(Thread):
 		self.lock = Lock()
 		self.running = True
 		self.setDaemon(True)		# connection should be properly closed
-		self.connection = connectionManager.getConnection(shared.isClient, shared.host, shared.port, True)
+		self.sock = connectionUtil.getSocket()
+		while True:
+			if (connectionUtil.connectClient(self.sock, shared.host, shared.port)):
+				print('A'*20)
+				break
+			time.sleep(0.5)
 
 	def run(self):
 		self.debug('Starting thread')
 		while self.running:
-			packet = self.connection.recv()
+			packet = connectionUtil.recvPacket(self.sock)
 			if (not packet):
 				self.debug('FAILED TO RECEIVE PACKET')
 				continue
 			self.debug('Got packet')
 			self.queueInbound(packet)
-			# time.sleep(0.01)
-		self.connection.close()
 		self.debug('Exiting thread')
 
 	def debug(self, val):
@@ -84,11 +95,16 @@ class InboundThread(Thread):
 		self.debug('Inbound lock released')
 		return packet
 
+	def stop(self):
+		self.debug('Stopping...')
+		self.sock.close()
+		self.running = False
+
 
 class NetworkHandler:
 
 	def __init__(self):
-		self.inboundThread = InboundThread()		# create an array of client listening threads, and make the central inbound thread accept connections and manage other threads
+		self.inboundThread = InboundThread()
 		self.outboundThread = OutboundThread()
 
 	def start(self):
@@ -96,8 +112,9 @@ class NetworkHandler:
 		self.outboundThread.start()
 
 	def stop(self):
-		self.inboundThread.running = False
-		self.outboundThread.running = False
+		logger.debug('Stopping network handler...')
+		self.inboundThread.stop()
+		self.outboundThread.stop()
 
 	def nextInbound(self):
 		logger.debug('Acquiring inbound lock...')

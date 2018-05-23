@@ -5,7 +5,6 @@ from timing import Timer
 from inputHandler import InputHandler
 from renderer import Renderer
 from map import Map
-from network.networkHandler import NetworkHandler
 
 
 def gameInput():
@@ -30,10 +29,12 @@ def gameRender():
 logger.init()
 for arg in sys.argv:
 	if(arg.lower() == 'server'):
+		from network.server import NetworkHandler
 		shared.isClient = False
 		shared.isNetworked = True
 		logger.debug('Running server')
 	elif(arg.lower() == 'client'):
+		from network.client import NetworkHandler
 		shared.isClient = True
 		shared.isNetworked = True
 		logger.debug('Running client')

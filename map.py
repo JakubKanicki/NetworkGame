@@ -11,13 +11,9 @@ class Map:
 		self.sizeX = sizeX
 		self.sizeY = sizeY
 		self.players = []
-		self.dPlayers = []
 		self.projectiles = []
-		self.dProjectiles = []
 		self.entities = []
-		self.dEntities = []
 		self.particles = []
-		self.dParticles = []
 		self.terrain = []
 
 		self.generate()		# TODO split this from initialisation
@@ -39,12 +35,14 @@ class Map:
 			self.terrain.append(temp)
 
 	def update(self):
-		self.updateGameObjects(self.players, self.dPlayers)
-		self.updateGameObjects(self.projectiles, self.dProjectiles)
-		self.updateGameObjects(self.entities, self.dEntities)
-		self.updateGameObjects(self.particles, self.dParticles)
+		self.updateGameObjects(self.players)
+		self.updateGameObjects(self.projectiles)
+		self.updateGameObjects(self.entities)
+		self.updateGameObjects(self.particles)
 
-	def updateGameObjects(self, list, dList):
+	def updateGameObjects(self, list):
+		dList = []
+
 		for obj in list:
 			if(obj.alive):
 				obj.update(self)
@@ -53,7 +51,6 @@ class Map:
 
 		for obj in dList:
 			list.remove(obj)
-		dList.clear()
 
 	def getGameObject(self, x, y, list):
 		for obj in list:
