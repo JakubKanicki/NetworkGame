@@ -20,6 +20,7 @@ from .packetInvalid import PacketInvalid
 from .packetKeyPressed import PacketKeyPressed
 from .packetFullMapSync import PacketFullMapSync
 from .packetClientRequest import PacketClientRequest
+from .packetPlayerMove import PacketPlayerMove
 
 
 def getPacketList():		# find a better way to do this
@@ -28,6 +29,7 @@ def getPacketList():		# find a better way to do this
 	packets.append(PacketKeyPressed)
 	packets.append(PacketFullMapSync)
 	packets.append(PacketClientRequest)
+	packets.append(PacketPlayerMove)
 	return packets
 
 def buildPacket(id):

@@ -3,3 +3,4 @@ class PacketType:
 	KEY_PRESSED = 1
 	FULL_MAP_SYNC = 2
 	CLIENT_REQUEST = 3
+	PLAYER_MOVE = 4

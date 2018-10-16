@@ -3,6 +3,7 @@ from .packetType import PacketType
 from . import streamUtil
 import logger
 from map import Map
+from player import Player
 
 
 class PacketFullMapSync(Packet):
@@ -17,7 +18,10 @@ class PacketFullMapSync(Packet):
 		for i in range(0, self.map.sizeY):
 			for j in range(0, self.map.sizeX):
 				streamUtil.writeInt(stream, self.map.terrain[i][j], 1)
-				# logger.debug('Transmitting X%i Y%i' % (j, i))
+				logger.debug('Transmitting X%i Y%i' % (j, i))
+		streamUtil.writeInt(stream, len(self.map.players), 1)
+		for player in self.map.players:
+			player.writeToStream(stream)
 		logger.debug('Map written')
 
 	def readData(self, stream):
@@ -30,10 +34,16 @@ class PacketFullMapSync(Packet):
 			temp = []
 			for j in range(0, self.map.sizeX):
 				temp.append(streamUtil.readInt(stream, 1))
-				# logger.debug('Receiving X%i Y%i' % (j, i))
+				logger.debug('Receiving X%i Y%i' % (j, i))
 			self.map.terrain.append(temp)
+		numPlayers = streamUtil.readInt(stream, 1)
+		for i in range(0, numPlayers):
+			player = Player(0, 0)
+			player.readFromStream(stream)
+			self.map.players.append(player)
 		logger.debug('Map read')
 
 	def execute(self, map):
 		logger.debug('Executing packet full map sync...')
 		map.terrain = self.map.terrain
+		map.players = self.map.players

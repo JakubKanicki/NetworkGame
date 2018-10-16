@@ -5,6 +5,7 @@ from projectile import Projectile
 from particle import Particle
 import game
 
+
 class Map:
 	
 	def __init__(self, sizeX, sizeY):
