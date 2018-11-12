@@ -2,7 +2,7 @@ from .packet import Packet
 from .packetType import PacketType
 from . import streamUtil
 import inputHandler
-import logger
+import logging
 
 
 class PacketKeyPressed(Packet):
@@ -18,5 +18,5 @@ class PacketKeyPressed(Packet):
 		self.keyId = streamUtil.readInt(stream, 1)
 
 	def execute(self, map):
-		logger.debug('Executing packet key pressed: %d' % self.keyId)
+		logging.info('Executing packet key pressed: %d' % self.keyId)
 		inputHandler.processNetworked(map, self.keyId)

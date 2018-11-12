@@ -1,7 +1,7 @@
 import os
 import platform
 import shared
-import logger
+import logging
 
 
 class Renderer:
@@ -12,9 +12,11 @@ class Renderer:
 		self.frameBuffer = []
 
 	def render(self, map):
+		if(not shared.enableRender):
+			return
 		self.frameBuffer = []
 
-		self.__draw('P: ' + str(len(map.projectiles)) + '\n')
+		self.__draw('P: %i NE: %i\n' % (len(map.projectiles), shared.invalidPacketCount))
 
 		for i in range(0, map.sizeY):
 			for j in range(0, map.sizeX):
@@ -26,9 +28,9 @@ class Renderer:
 			self.__draw('\n')
 
 		if(not shared.debugRender):
-			logger.debug('-RENDER-%s-' % self.clearCall.upper())
+			logging.debug('-RENDER-%s-' % self.clearCall.upper())
 			os.system(self.clearCall)
-		logger.debug('-PRINTING-')
+		logging.debug('Printing')
 		print(''.join(self.frameBuffer), end='')
 
 	def __draw(self, value):

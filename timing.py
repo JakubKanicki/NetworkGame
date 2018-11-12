@@ -1,5 +1,5 @@
 import time
-import logger
+import logging
 
 
 class Timer:
@@ -13,11 +13,11 @@ class Timer:
 		target = 1000 / fps
 		frameTime = getMillis() - self.frameBegin
 		if(frameTime > target):
-			logger.debug('FRAME TIME (%d) HIGHER THAN TARGET (%d) SKIPPING SLEEP' % (frameTime, target))
+			logging.warning('Frame time (%d) higher than target (%d) skipping sleep' % (frameTime, target))
 			self.frameBegin = getMillis()
 			return
 		sleepTime = target - frameTime
-		logger.debug('Frame time %d (target %d), sleeping for %d' % (frameTime, target, sleepTime))
+		logging.debug('Frame time %d (target %d), sleeping for %d' % (frameTime, target, sleepTime))
 		time.sleep(sleepTime / 1000)
 		self.frameBegin = getMillis()
 
@@ -25,10 +25,10 @@ class Timer:
 		curTime = getMillis()
 		if(self.section != None):
 			sectionTime = curTime - self.sectionStartTime
-			logger.debug('---END-%s-%d---' % (self.section, sectionTime))
+			logging.debug('---END-%s-%d---' % (self.section, sectionTime))
 		self.sectionStartTime = curTime
 		self.section = section
-		logger.debug('---START-%s---' % section)
+		logging.debug('---START-%s---' % section)
 
 
 def getMillis():

@@ -1,16 +1,18 @@
 import sys
+import os
 import shared
-import logger
+import logging
+import time
 from timing import Timer
 from inputHandler import InputHandler
 from renderer import Renderer
 from map import Map
-from network.networkHandler import NetworkHandler
 
 
 def gameInput():
 	timer.startSection('INPUT')
 	inputHandler.handleInput(map)
+
 
 def gameLogic():
 	if(shared.isNetworked):
@@ -22,27 +24,35 @@ def gameLogic():
 	timer.startSection('LOGIC')
 	map.update()		# disable this somewhat on clients
 
+
 def gameRender():
 	timer.startSection('RENDER')
 	renderer.render(map)
 
 
-logger.init()
+# if(os.path.exists(log)):
+# 	os.remove(log)
+logging.basicConfig(filename=str(time.time()) + '.log',
+					format='%(levelname)s|%(msecs)d|%(threadName)s|%(module)s|%(message)s',
+					level=logging.INFO)
+
 for arg in sys.argv:
 	if(arg.lower() == 'server'):
+		from network.server import NetworkHandler
 		shared.isClient = False
 		shared.isNetworked = True
-		logger.debug('Running server')
+		logging.info('Running server')
 	elif(arg.lower() == 'client'):
+		from network.client import NetworkHandler
 		shared.isClient = True
 		shared.isNetworked = True
-		logger.debug('Running client')
+		logging.info('Running client')
 	elif (len(arg) > 3 and arg.lower()[:3] == 'ip='):
 		shared.host = arg.lower()[3:]
-		logger.debug('IP: ' + str(shared.host))
+		logging.info('IP: ' + str(shared.host))
 	elif (len(arg) > 5 and arg.lower()[:5] == 'port='):
 		shared.port = int(arg.lower()[5:])
-		logger.debug('Port: ' + str(shared.port))
+		logging.info('Port: ' + str(shared.port))
 
 timer = Timer()
 map = Map(96, 48)
@@ -60,4 +70,3 @@ while shared.running:
 	timer.sync(10)
 if(shared.isNetworked):
 	networkHandler.stop()
-logger.finish('main.log' if shared.isClient else 'server.log')

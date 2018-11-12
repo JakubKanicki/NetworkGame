@@ -1,8 +1,9 @@
 import random
-import directions
+import shared
 from player import Player
 from projectile import Projectile
 from particle import Particle
+import game
 
 
 class Map:
@@ -11,22 +12,13 @@ class Map:
 		self.sizeX = sizeX
 		self.sizeY = sizeY
 		self.players = []
-		self.dPlayers = []
 		self.projectiles = []
-		self.dProjectiles = []
 		self.entities = []
-		self.dEntities = []
 		self.particles = []
-		self.dParticles = []
 		self.terrain = []
+		self.isGenerated = False
 
-		self.generate()		# TODO split this from initialisation
-		self.players.append(Player(0, 0))
-		self.clearArea(5, 5, 5)
-		self.players.append(Player(sizeX-1, sizeY-1))		#temporary
-		self.clearArea(sizeX-5, sizeY-5, 5)
-
-	def generate(self):
+	def generateRandom(self):
 		for i in range(0, self.sizeY):
 			temp = []
 			for j in range(0, self.sizeX):
@@ -38,13 +30,28 @@ class Map:
 				temp.append(tile)
 			self.terrain.append(temp)
 
-	def update(self):
-		self.updateGameObjects(self.players, self.dPlayers)
-		self.updateGameObjects(self.projectiles, self.dProjectiles)
-		self.updateGameObjects(self.entities, self.dEntities)
-		self.updateGameObjects(self.particles, self.dParticles)
+	def generateMap(self):
+		self.generateRandom()
+		self.players.append(Player(0, 0))
+		self.clearArea(5, 5, 5)
+		self.players.append(Player(self.sizeX - 1, self.sizeY - 1))  # temporary
+		self.clearArea(self.sizeX - 5, self.sizeY - 5, 5)
+		self.isGenerated = True
 
-	def updateGameObjects(self, list, dList):
+	def update(self):
+		if(not self.isGenerated):
+			if(shared.isNetworked and shared.isClient):
+				from network.packetClientRequest import PacketClientRequest
+				game.networkHandler.queueOutbound(PacketClientRequest(PacketClientRequest.REQ_FULL_MAP_SYNC))
+			self.generateMap()
+		self.updateGameObjects(self.players)
+		self.updateGameObjects(self.projectiles)
+		self.updateGameObjects(self.entities)
+		self.updateGameObjects(self.particles)
+
+	def updateGameObjects(self, list):
+		dList = []
+
 		for obj in list:
 			if(obj.alive):
 				obj.update(self)
@@ -53,7 +60,6 @@ class Map:
 
 		for obj in dList:
 			list.remove(obj)
-		dList.clear()
 
 	def getGameObject(self, x, y, list):
 		for obj in list:
@@ -116,7 +122,7 @@ class Map:
 		if(self.isValid(x, y)):
 			return self.terrain[y][x]
 
-	def getTopObject(self, x, y):
+	def getTopObject(self, x, y):		# todo refactor this
 		gameObject = self.getPlayer(x, y)
 		if not gameObject:
 			gameObject = self.getProjectile(x, y)

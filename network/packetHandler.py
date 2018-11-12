@@ -1,5 +1,5 @@
 from . import streamUtil
-import logger
+import logging
 
 
 def sendPacket(stream, packet):
@@ -7,25 +7,29 @@ def sendPacket(stream, packet):
 	packet.writeData(stream)
 	return stream
 
+
 def receivePacket(stream):
 	id = streamUtil.readInt(stream, 1)
-	logger.debug('Receiving packet with id: %i' % id)
+	logging.info('Receiving packet with id: %i' % id)
 	packet = buildPacket(id)
 	packet.readData(stream)
 	return packet
 
 
 from .packetInvalid import PacketInvalid
-from .packetMessage import PacketMessage
 from .packetKeyPressed import PacketKeyPressed
 from .packetFullMapSync import PacketFullMapSync
+from .packetClientRequest import PacketClientRequest
+from .packetPlayerMove import PacketPlayerMove
+
 
 def getPacketList():		# find a better way to do this
 	packets = []
 	packets.append(PacketInvalid)
-	packets.append(PacketMessage)
 	packets.append(PacketKeyPressed)
 	packets.append(PacketFullMapSync)
+	packets.append(PacketClientRequest)
+	packets.append(PacketPlayerMove)
 	return packets
 
 def buildPacket(id):

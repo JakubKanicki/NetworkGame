@@ -1,11 +1,11 @@
 import platform
+import logging
 from queue import Queue
 from threading import Thread, Lock
 import shared
 from network.packetKeyPressed import PacketKeyPressed
 from directions import Direction
 from keys import Key
-import logger
 import game
 
 if(platform.system() == 'Windows'):
@@ -24,21 +24,18 @@ class InputThread(Thread):
 		self.setDaemon(True)
 
 	def run(self):
-		self.debug('Starting thread')
+		logging.info('Starting thread')
 		while shared.running:
 			inpt = self.getInput()
-			self.debug('Acquiring input lock, inpt is: ' + inpt)
+			logging.debug('Acquiring input lock, inpt is: ' + inpt)
 			self.lock.acquire()
-			self.debug('Input lock acquired, queue size: ' + str(self.queue.qsize()))
+			logging.debug('Input lock acquired, queue size: ' + str(self.queue.qsize()))
 			if(not self.queue.full()):
 				self.queue.put(inpt)
-				self.debug('Inpt added to queue')
+				logging.debug('Inpt added to queue')
 			self.lock.release()
-			self.debug('Input lock released')
-		self.debug('Exiting thread')
-
-	def debug(self, val):
-		logger.debug(self.getName() + '| ' + val, isDaemon=True)
+			logging.debug('Input lock released')
+		logging.info('Exiting thread')
 
 	def getInput(self):
 		inpt = None
@@ -57,20 +54,20 @@ class InputHandler:
 
 	def handleInput(self, map):
 		inptHistory = []
-		logger.debug('Checking queue...')
-		logger.debug('Acquiring input lock...')
+		logging.debug('Checking queue...')
+		logging.debug('Acquiring input lock...')
 		self.inputThread.lock.acquire()
-		logger.debug('Input lock acquired')
+		logging.debug('Input lock acquired')
 		while not self.inputThread.queue.empty():
-			logger.debug('Input queue size: ' + str(self.inputThread.queue.qsize()))
+			logging.debug('Input queue size: ' + str(self.inputThread.queue.qsize()))
 			inpt = self.inputThread.queue.get()
-			logger.debug('Input is: ' + inpt)
+			logging.debug('Input is: ' + inpt)
 			if(not inpt in inptHistory):
 				inptHistory.append(inpt)
 			process(inpt, map)
 		self.inputThread.lock.release()
-		logger.debug('Input lock released')
-		logger.debug('Input handled')
+		logging.debug('Input lock released')
+		logging.debug('Input handled')
 
 
 def process(inpt, map):
