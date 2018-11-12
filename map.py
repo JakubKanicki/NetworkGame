@@ -1,8 +1,9 @@
 import random
-import directions
+import shared
 from player import Player
 from projectile import Projectile
 from particle import Particle
+import game
 
 
 class Map:
@@ -15,14 +16,9 @@ class Map:
 		self.entities = []
 		self.particles = []
 		self.terrain = []
+		self.isGenerated = False
 
-		self.generate()		# TODO split this from initialisation
-		self.players.append(Player(0, 0))
-		self.clearArea(5, 5, 5)
-		self.players.append(Player(sizeX-1, sizeY-1))		#temporary
-		self.clearArea(sizeX-5, sizeY-5, 5)
-
-	def generate(self):
+	def generateRandom(self):
 		for i in range(0, self.sizeY):
 			temp = []
 			for j in range(0, self.sizeX):
@@ -34,7 +30,20 @@ class Map:
 				temp.append(tile)
 			self.terrain.append(temp)
 
+	def generateMap(self):
+		self.generateRandom()
+		self.players.append(Player(0, 0))
+		self.clearArea(5, 5, 5)
+		self.players.append(Player(self.sizeX - 1, self.sizeY - 1))  # temporary
+		self.clearArea(self.sizeX - 5, self.sizeY - 5, 5)
+		self.isGenerated = True
+
 	def update(self):
+		if(not self.isGenerated):
+			if(shared.isNetworked and shared.isClient):
+				from network.packetClientRequest import PacketClientRequest
+				game.networkHandler.queueOutbound(PacketClientRequest(PacketClientRequest.REQ_FULL_MAP_SYNC))
+			self.generateMap()
 		self.updateGameObjects(self.players)
 		self.updateGameObjects(self.projectiles)
 		self.updateGameObjects(self.entities)

@@ -67,7 +67,7 @@ class InboundThread(Thread):		# TODO check packet side
 		self.sock = connectionUtil.getSocket()
 		while True:
 			if (connectionUtil.connectClient(self.sock, shared.host, shared.port)):
-				print('A'*20)
+				# print('A'*20)
 				break
 			time.sleep(0.5)
 
