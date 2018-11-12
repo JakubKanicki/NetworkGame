@@ -5,7 +5,6 @@ from . import packetHandler
 import logging
 
 
-
 def getSocket():
 	return socket.socket(socket.AF_INET, socket.SOCK_STREAM)		# tcp socket.SOCK_STREAM; udp socket.SOCK_DGRAM
 
